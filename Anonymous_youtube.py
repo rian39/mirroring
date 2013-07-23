@@ -1,21 +1,58 @@
 # -*- coding: utf-8 -*-
 # <nbformat>3.0</nbformat>
 
+# <markdowncell>
+
+# # Exploration of the Anonymous videos on Youtube. 
+# 
+# ## How the initial data was generated (by Davide Beraldo)
+# 
+# The query: "anonymous internet freedom"
+# 
+# Some notes: I have just discovered that some changes have been made to YT api, so the script was not able to retreive keywords associated with videos (that can be interesting for semantic network analysis purposed) and that videos descriptions are truncated. I will try to figure out whether is possible to fix the first shortcome; for the second, luckly the "related videos" descriptions are still complete..and usually there is wide redundancy, so maybe it can be easily overcame (consider that in this sample I restricted related videos to 25 for each); the comments are also in this case limited to 25; videos are ordered by relevance computed by Youtube itself; users are limited to original content submitters; the string I input as keyword was only "anonymous internet freedom".
+# 
+# (1) retrieve up to 1000 videos queried by keywords (including username,date,category,n of favorites, n of views,duration, tags and description)
+# -maybe it is possible to extend the 1000 limit, or by the way it can be somehow done with the following module-
+# 
+# (2) reconstruct the network of "related videos" for each video retrieved (with the metadata above)
+# -the alghoritm for matching related videos is of course not known, but as far as I understood it should be both related to tags and to users' behaviour: the more two videos are viewed in sequence, the more related they'll be... so it can provide interesting insights on network of content-
+# 
+# (3) scrape comments related to the videos/related videos retrieved (including user name, time and parent comments) 
+# The geo info are quite tricky cause there is no "nationality" associated to the video, but the language...at least not provided with the api! But maybe something can be inferred with a heuristic approach (nations mentioned in the title/description/comments)
+
 # <codecell>
 
 import pandas as pd
 from pylab import *
-pd.set_option('display.max_colwidth', -1)
+from IPython.display import HTML
+from IPython.display import YouTubeVideo
+pd.set_option("display.max_columns", 6)
+pd.set_option("display.max_rows", 15)
+pd.set_option("display.notebook_repr_html", True)
 
 # <codecell>
 
-an_f = pd.ExcelFile('anonymouys internet freedom - VIDEOS.xls')
+an_f = pd.ExcelFile('data/anonymouys internet freedom - VIDEOS.xls')
 an_dict = {name:an_f.parse(name) for name in an_f.sheet_names}
 video_df = an_dict['VIDEOS']
+#clean up data a bit
+video_df.VIEWS = video_df.VIEWS.replace('None', 0)
+video_df.shape
+
+# <codecell>
+
+print('Users: ', len(video_df.USER.unique()))
+print('Titles: ', len(video_df.TITLE.unique()))
 
 # <markdowncell>
 
-# # The length of the videos
+# ## Shape of the video data
+# 
+# There are 908 titles in the dataset, of which 283 are unique. There are 246 users -- people (robots?) who upload videos.
+
+# <markdowncell>
+
+# ## The length of the videos
 # 
 # Not sure what the length of videos tells us. Something about the kind of object we are dealing with. Also, I guess length affects mirroring. Would many people upload a 60 minute documentary?
 
@@ -23,11 +60,15 @@ video_df = an_dict['VIDEOS']
 
 duration = video_df.DURATION.order().tolist()
 duration = [d/60 for d in duration]
-h=hist(duration, bins=100)
+f = pylab.figure(figsize=(10,5))
+sp=f.add_subplot(1,1,1)
+
+h=sp.hist(duration, bins=100)
 print('Less than 10 minutes: '+ str(float(sum(video_df.DURATION/60 < 10))/video_df.DURATION.shape[0]*100)+ '%')
-title('Length of videos (minutes)')
-xlabel('minutes')
-ylabel('videos')
+sp.set_title('Length of videos (minutes)')
+sp.set_xlabel('minutes')
+sp.set_ylabel('videos')
+YouTubeVideo(video_df.ID.iloc[1])
 
 # <markdowncell>
 
@@ -58,23 +99,23 @@ sp.set_ylim(0, 1e7)
 
 video_df.VIEWS = video_df.VIEWS.replace('None', 0)
 views = video_df.VIEWS.order()
-figure(figsize(10,10))
+f=figure(figsize(10,5))
 suptitle('Views of videos at different scale')
-subplot(2,2,1)
-h1=hist(views, bins=100)
-ylabel('Number of videos')
-xlabel('Number of views')
-title('View high scale')
-subplot(2,2,2)
-h2 = hist(views[views<100], bins=100)
-title('View on medium scale')
-ylabel('Number of videos')
-xlabel('Number of views')
-subplot(2,2,3)
-h3 = hist(views[views<10], bins = 10)
-title('View on low scale')
-ylabel('Number of videos')
-xlabel('Number of views')
+sp1 = f.add_subplot(1,3,1)
+h1=sp1.hist(views, bins=100)
+sp1.set_ylabel('Number of videos')
+sp1.set_xlabel('Number of views')
+sp1.set_title('View high scale')
+sp2 = f.add_subplot(1,3,2)
+h2 = sp2.hist(views[views<100], bins=100)
+sp2.set_title('View on medium scale')
+sp2.set_ylabel('Number of videos')
+sp2.set_xlabel('Number of views')
+sp3 = f.add_subplot(1,3,3)
+h3 = sp3.hist(views[views<10], bins = 10)
+sp3.set_title('View on low scale')
+sp3.set_ylabel('Number of videos')
+sp3.set_xlabel('Number of views')
 
 # <markdowncell>
 
@@ -88,23 +129,26 @@ xlabel('Number of views')
 
 top_views = video_df.loc[video_df.VIEWS>100000, ['TITLE', 'VIEWS']]
 gby=top_views.groupby(by='TITLE')['VIEWS']
-print('total viewings:', video_df['VIEWS'].sum())
+print('total viewings:'+str(video_df['VIEWS'].sum()))
 print('total views of top videos:', sum(gby.sum()))
 print('total views of top 5 videos:', sum(gby.sum()[:4]))
 
 print(gby.ngroups)
 gbyo=gby.sum().order(ascending=False)
 pie(gbyo[0:9], labels=gbyo.keys()[0:9])
-title('Most viewed videos in terms of view share')
-
-
-print(gby.sum().order(ascending=False))
-
+pylab.title('Most viewed videos in terms of view share')
+pd.DataFrame(gbyo).head(n=5)
 
 # <markdowncell>
 
 # There are 18 videos that each have more 100,00 views. There have been around 480 million views in total of Anonymous-related videos. The top 18 videos account for 477 million of the views. The top 5 videos account for 460 million of the 480 million. 
 # Looking at the titles, is the 'Emmanuel Kelly X Factor 2011 Auditions' video 'noise'? Maybe not -- he's an Iraqi orphan living in Australia, and 'Collateral Murder - Wikileaks - Iraq' (#2) doesn't look like that. The top four videos after Kelly's all have more than 50 million viewings. So they dominate the total views of Anonymous videos. 
+
+# <codecell>
+
+#video_df.TITLE.
+emmanuel_kelly = video_df.ID[video_df.TITLE == gbyo.index[0]]
+YouTubeVideo(emmanuel_kelly.iloc[0])
 
 # <markdowncell>
 
@@ -117,25 +161,27 @@ print(gby.sum().order(ascending=False))
 title = video_df.TITLE.tolist()
 video_df.TITLE = [t.encode('utf8', errors='ignore') for t in title]
 print('distinct titles:', len(video_df.TITLE.unique()))
+print('distinct ids', len(video_df.ID.unique()))
 print('distinct durations:', len(video_df.DURATION.unique()))
 
 # <markdowncell>
 
-# While there are 908 videos listed, there are only 283 distinctly titled videos. That means that potentially ~620 are copies. 
-# This is borne out in the duration data. There are only 220 distinct durations. 
+# While there are 908 videos listed, there are only 283 distinctly titled videos and 289 distinct video IDS. That means that potentially ~620 are copies. But if copies have the same ID, does that mean that they have been uploaded? Or are they simply different views on the same video? This is a crucial question - are we dealing here with duplicates or just references to one instance?  
+# Things are a bit more complicated in the duration data. There are only 220 distinct durations. But it could be that different videos happen to have the same duration. 
 # What are the most commonly duplicated videos?
 
 # <codecell>
 
 dup_video_counts =video_df.TITLE.value_counts()
-print(dup_video_counts)
+dup_df = pd.DataFrame(dup_video_counts.head())
+dup_df
 
 # <codecell>
 
 top_dup_video_counts=dup_video_counts[dup_video_counts>5]
 top_dup_video_counts = top_dup_video_counts.order(ascending=False)
 top_dup_videos = dup_video_counts.index
-print(top_dup_video_counts)
+top_dup_video_counts
 
 # <markdowncell>
 
@@ -145,7 +191,8 @@ print(top_dup_video_counts)
 
 dup_views=video_df.loc[video_df.TITLE.isin(top_dup_videos), ['TITLE', 'VIEWS']]
 dup_views['copies'] = top_dup_video_counts
-dup_views.groupby(['TITLE'])['VIEWS'].sum().order(ascending=False)
+dv =pd.DataFrame(dup_views.groupby(['TITLE'])['VIEWS'].sum().order(ascending=False))
+dv.head()
 
 # <markdowncell>
 
@@ -169,8 +216,10 @@ video_df['USER'].unique().shape
 # <codecell>
 
 user_counts = video_df['USER'].value_counts()
-h4 = hist(video_df['USER'].value_counts(), bins=100)
-title('Number of videos per user')
+f3 = figure(figsize=(5,3))
+sp=f3.add_subplot(111)
+h4 = sp.hist(video_df['USER'].value_counts(), bins=100)
+sp.set_title('Number of videos per user')
 top_users = user_counts[user_counts>5].index
 top_users
 print(user_counts.describe())
@@ -188,30 +237,37 @@ user_counts.quantile(0.6)
 
 # <codecell>
 
-topuser_toptitle=pd.crosstab(video_df[video_df.USER.isin(top_users)]['USER'], video_df[video_df.TITLE.isin(top_videos)]['TITLE'])
-topuser_toptitle.sum(axis=1).order(ascending=False)
+topuser_toptitle=pd.crosstab(video_df[video_df.USER.isin(top_users)]['USER'], video_df[video_df.TITLE.isin(top_dup_videos)]['TITLE'])
+top_user_title_df = pd.DataFrame(topuser_toptitle.sum(axis=1).order(ascending=False))
+top_user_title_df.head()
 
 # <markdowncell>
 
-# This suggests that there is some link between between uploading a lot and duplicating a lot. I'm not sure about this actually -- needs further thought. There is still the question of whether the duplicates are viewed a lot. 
+# This suggests that there is some link between between uploading a lot and duplicating a lot. I'm not sure about this actually -- needs further thought. There is still the question of whether the duplicates are viewed a lot. And do these high duplicating users duplicate the same videos?
 
 # <markdowncell>
 
 # ## What is viewed
 # 
-# Many questions could be asked here. 
+# Many questions could be asked here. For highly duplicated videos, are all copies viewed at similar levels or not?
 
 # <codecell>
 
 date = pd.to_datetime(video_df.DATA)
+video_df.DATA = date
+video_df.groupby(by=['TITLE'])['VIEWS'].sum().order()
 
 # <codecell>
 
-figure(figsize=(8,6), dpi=400)
-scatter(date, video_df.VIEWS)
-title('Viewing activity over time')
-ylabel('Views')
+f = figure(figsize=(8,6), dpi=400)
+s = f.add_subplot(111)
+s.scatter(date, video_df.VIEWS)
+s.set_title('Viewing activity over time')
+s.set_ylabel('Views')
 
-# <codecell>
+top_views.head()
 
+# <markdowncell>
+
+# Hard to see what is happening in the viewing of these videos. 
 
