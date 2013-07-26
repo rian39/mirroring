@@ -4,32 +4,40 @@
 		"selected_items":
 		[
 			[
-				"Y_",
-				"Y_sd"
+				"sl",
+				"sleep_time"
 			],
 			[
-				"Y",
-				"Y_mean"
+				"read",
+				"readme_df"
 			],
 			[
-				"alp",
-				"alpha_v"
+				"readme",
+				"readmes"
 			],
 			[
-				"X_",
-				"X_norm"
+				"own",
+				"owners_repos"
 			],
 			[
-				"grad",
-				"gradientDescent"
+				"repo",
+				"repo_url"
 			],
 			[
-				"thea",
-				"theta_temp"
+				"base",
+				"base_url"
 			],
 			[
-				"thet",
-				"theta_temp"
+				"repos",
+				"repositories"
+			],
+			[
+				"r",
+				"repository"
+			],
+			[
+				"White",
+				"whitehead_modes_1958"
 			],
 			[
 				"missing",
@@ -160,10 +168,13 @@
 	"buffers":
 	[
 		{
-			"file": "/home/mackenza/Documents/mirroring/Anonymous_youtube.py",
+			"contents": "# %load_ext autoreload\n# %autoreload 2\n\n\nfrom apiclient.discovery import build\nfrom optparse import OptionParser\n\n\nimport pandas as pd\n\n# Set DEVELOPER_KEY to the \"API key\" value from the \"Access\" tab of the\n# Google APIs Console http://code.google.com/apis/console#access\n# Please ensure that you have enabled the YouTube Data API for your project.\nDEVELOPER_KEY = open('api.txt').readline()\nYOUTUBE_API_SERVICE_NAME = \"youtube\"\nYOUTUBE_API_VERSION = \"v3\"\n\n#sample get:\n#https://www.googleapis.com/youtube/v3/videos?id=7lCDEYXw3mM&key=AIzaSyBFAnShIZy8_McvshPS3o9uac8ZODaktcA&part=snippet,contentDetails,statistics,status\n\ndef youtube_search(options, query = ''):\n  youtube = build(YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VERSION,\n    developerKey=DEVELOPER_KEY)\n\n  if query != '':\n    options.q = query\n\n  search_response = youtube.search().list(\n    q=options.q,\n    part=\"id,snippet\",\n    type='video',\n    maxResults=options.maxResults\n  ).execute()\n\n  di={i['etag']:i['snippet'] for i in search_response['items']}\n  df = pd.DataFrame(di.values(), index = di.keys())\n\n  # to retrieve more pages\n  nextPage = search_response['nextPageToken']\n\n  while nextPage != None and  df.shape[0] <5000:\n    search_response = youtube.search().list(\n      q=options.q,\n      part=\"id,snippet\",\n      type='video',\n      maxResults=options.maxResults\n    ).execute()\n    dit={i['etag']:i['snippet'] for i in search_response['items']}\n    print ('getting another page of results ... ' + str(df.shape[0]))\n    dft  = pd.DataFrame(dit.values(), index = dit.keys())\n    df = df.append(dft, ignore_index=True)\n    nextPage = search_response['nextPageToken']\n  return df\n\ndef test():\n  parser = OptionParser()\n  parser.add_option(\"--q\", dest=\"q\", help=\"Search term\",\n    default=\"Google\")\n  parser.add_option(\"--max-results\", dest=\"maxResults\",\n    help=\"Max results\", default=25)\n  (options, args) = parser.parse_args()\n  return youtube_search(options)\n\ndef setOptions():\n  parser = OptionParser()\n  parser.add_option(\"--q\", dest=\"q\", help=\"Search term\",\n    default=\"Google\")\n  parser.add_option(\"--max-results\", dest=\"maxResults\",\n    help=\"Max results\", default=25)\n  \n  (options, args) = parser.parse_args()\n  return options\n\nif __name__ == \"__main__\":\n  options = setOptions()\n  youtube_search(options)",
+			"file": "YT_api_generate.py",
+			"file_size": 2288,
+			"file_write_time": 130193205391229111,
 			"settings":
 			{
-				"buffer_size": 7168,
+				"buffer_size": 2289,
 				"line_ending": "Unix"
 			}
 		}
@@ -171,23 +182,19 @@
 	"build_system": "Packages/R Tools/R.sublime-build",
 	"command_palette":
 	{
-		"height": 392.0,
+		"height": 54.0,
 		"selected_items":
 		[
 			[
-				"set",
-				"Set Syntax: Markdown"
+				"json",
+				"Set Syntax: JSON"
 			],
 			[
-				"set mark",
-				"Set Syntax: Markdown"
+				"set la",
+				"Set Syntax: LaTeX"
 			],
 			[
-				"set am",
-				"Set Syntax: Markdown"
-			],
-			[
-				"set m",
+				"set mak",
 				"Set Syntax: Markdown"
 			],
 			[
@@ -195,7 +202,47 @@
 				"Set Syntax: LaTeX"
 			],
 			[
+				"upda",
+				"Package Control: Upgrade/Overwrite All Packages"
+			],
+			[
+				"inst",
+				"Package Control: Install Package"
+			],
+			[
+				"git",
+				"GitHub: Update Gist"
+			],
+			[
+				"gith",
+				"Git: Commit history"
+			],
+			[
+				"set mark",
+				"Set Syntax: Markdown"
+			],
+			[
+				"github",
+				"GitHub: Public Gist from Selection"
+			],
+			[
+				"pack",
+				"Package Control: Install Package"
+			],
+			[
+				"set mar",
+				"Set Syntax: Markdown"
+			],
+			[
 				"mark",
+				"Set Syntax: Markdown"
+			],
+			[
+				"set",
+				"Set Syntax: Markdown"
+			],
+			[
+				"set m",
 				"Set Syntax: Markdown"
 			],
 			[
@@ -205,10 +252,6 @@
 			[
 				"Snippet: ",
 				"Snippet: knit-chunk"
-			],
-			[
-				"pack",
-				"Package Control: Disable Package"
 			],
 			[
 				"set syntaxm",
@@ -271,50 +314,36 @@
 	},
 	"file_history":
 	[
-		"/home/mackenza/R/coursera/ml-ng/mlclass-ex2/ex2.R",
-		"/home/mackenza/R/coursera/ml-ng/ex1/computeCostMulti.m",
-		"/home/mackenza/Documents/data_intensive/transformation_soc_sci_oxford_2013/mackenzie_slides_oxford_feb_2013.Rmd",
-		"/home/mackenza/R/coursera/ml-ng/ex1/computeCost.R",
-		"/home/mackenza/R/coursera/ml-ng/ex1/gradientDescent.R",
-		"/home/mackenza/R/coursera/ml-ng/ex1/ex1.R",
-		"/home/mackenza/Documents/notes/Wilson,_Affect and Artificial Intelligence2009.md",
-		"/home/mackenza/Documents/data_intensive/book/animations/grad_desc.R",
-		"/home/mackenza/Documents/data_intensive/book/pandoc.sh",
-		"/home/mackenza/Documents/data_intensive/book/build.sh",
-		"/home/mackenza/Documents/data_intensive/book/ch2-curves/ch2_curves_function.rmd",
-		"/home/mackenza/Documents/data_intensive/book/references/Exported Items.bib",
-		"/media/0031-014A/digital contours_ software materiality_review.md",
-		"/home/mackenza/Documents/data_intensive/book/ch1/ch1_praxis.rmd",
-		"/tmp/data_forms/ch1-learning/ch1_praxis.rmd",
-		"/home/mackenza/Documents/data_intensive/book/ch1_praxis.md",
-		"/home/mackenza/Documents/data_intensive/book/ch1_praxis.rmd",
-		"/home/mackenza/Documents/data_intensive/book/knit_all.sh",
-		"/var/tmp/kdecache-mackenza/krun/19894.0.international_collaboration.shtml",
-		"/home/mackenza/R/coursera/ml-ng/ex1/gradientDescent.m",
-		"/home/mackenza/R/coursera/ml-ng/ex1/computeCost.m",
-		"/home/mackenza/R/coursera/ml-ng/ex1/ex1.m",
-		"/home/mackenza/R/coursera/ml-ng/ex1/ex1data1.txt",
-		"/home/mackenza/Documents/notes/Whitehead_science_mw.mdown",
-		"/home/mackenza/bank.txt",
-		"/home/mackenza/.cache/.fr-k5nMam/ghProjectInfo2013-Feb.txt",
-		"/home/mackenza/Documents/data_intensive/book/knit_all.R",
-		"/home/mackenza/Documents/data_intensive/book/proposal.md",
-		"/home/mackenza/Documents/notes/hayles_my_mother_2005.mdown",
-		"/home/mackenza/Dropbox/epistle/Data forms.txt",
-		"/home/mackenza/Desktop/jss725.Rnw",
-		"/home/mackenza/Documents/notes/milleplateux.md",
-		"/home/mackenza/Desktop/jss725-tikzDictionary",
+		"/home/mackenza/R/metacommunities/flossmole_data.py",
+		"/home/mackenza/R/metacommunities/flossmole_data.ipynb",
+		"/home/mackenza/Dropbox/metacommunities/StackExchange data readme.txt",
+		"/home/mackenza/Documents/data_intensive/book/proposal2.mdown",
+		"/home/mackenza/Documents/data_intensive/number_supply/template.latex",
+		"/home/mackenza/R/github/ipython_edit_ZqD3Kx.py",
+		"/home/mackenza/C:\\nppdf32Log\\debuglog.txt",
 		"/home/mackenza/Documents/data_intensive/book/template.latex",
+		"/home/mackenza/Documents/data_intensive/book/references/Exported Items.bib",
+		"/home/mackenza/Documents/data_intensive/number_supply/h1n1_feb2013.rmd",
+		"/home/mackenza/Documents/data_intensive/book/.git/HEAD",
+		"/home/mackenza/Documents/data_intensive/book/4s_cfp.mdown",
+		"/home/mackenza/.config/sublime-text-2/Packages/User/GitHub.sublime-settings",
+		"/home/mackenza/.config/sublime-text-2/Packages/User/Default (Linux).sublime-keymap",
+		"/home/mackenza/.config/sublime-text-2/Packages/Default/Default (Linux).sublime-keymap",
+		"/home/mackenza/.config/sublime-text-2/Packages/sublime-github/GitHub.sublime-settings",
+		"/home/mackenza/Documents/notes/wasserman_all_of_stat2003.mdown",
+		"/home/mackenza/.config/sublime-text-2/Packages/sublime-github/README.md",
 		"/home/mackenza/Documents/data_intensive/book/references/refs.bib",
 		"/home/mackenza/.cache/.fr-BlOcAR/2012-04-08-9.json",
 		"/home/mackenza/Documents/google_analytics_spet2012/google.sublime-workspace",
 		"/home/mackenza/Documents/notes/dewey_reconstruction_1957.odt",
+		"/home/mackenza/Documents/data_intensive/book/knit_all.R",
 		"/home/mackenza/Documents/data_intensive/lse_cambridge_markets_algorithms/markets_algorithms.Rmd",
 		"/home/mackenza/Documents/data_intensive/book/Sources.md",
+		"/home/mackenza/Documents/data_intensive/book/build.sh",
+		"/home/mackenza/Documents/data_intensive/book/pandoc.sh",
 		"/home/mackenza/Desktop/drawing-1.svg",
 		"/home/mackenza/Documents/data_intensive/book/markets_algorithms.Rmd",
 		"/home/mackenza/R/igem/igem.sublime-workspace",
-		"/home/mackenza/Documents/data_intensive/book/proposal2.mdown",
 		"/var/tmp/kdecache-mackenza/krun/8479.0.nbt.2495.html",
 		"/home/mackenza/Documents/data_intensive/ngs_data_topography/ngs_paper/test.md",
 		"/home/mackenza/Documents/data_intensive/ngs_data_topography/ngs_paper/test.rmd",
@@ -349,8 +378,6 @@
 		"/home/mackenza/Dropbox/data-economy/ngs_paper/template.latex",
 		"/home/mackenza/Dropbox/data-economy/ngs_paper/latex.template",
 		"/home/mackenza/Dropbox/data-economy/ngs_paper/pandoc_format_paper.sh",
-		"/home/mackenza/.config/sublime-text-2/Packages/User/Default (Linux).sublime-keymap",
-		"/home/mackenza/.config/sublime-text-2/Packages/Default/Default (Linux).sublime-keymap",
 		"/home/mackenza/.config/sublime-text-2/Packages/User/Preferences.sublime-settings",
 		"/home/mackenza/.config/sublime-text-2/Packages/User/Markdown.sublime-settings",
 		"/home/mackenza/R/ngs/eagle_analysis.R",
@@ -410,24 +437,17 @@
 		"case_sensitive": true,
 		"find_history":
 		[
-			"conway_machine_2012",
-			"conway",
-			"Ng",
-			"library",
-			"white",
-			"X_3",
-			"X_2",
-			"colmeans",
-			"gradientDescent_two_dim",
-			"    >",
-			"print",
-			"The recent",
+			"req.json",
+			"req.json ",
+			"req.json",
+			"pn",
+			"'git",
 			"technique_demos",
-			"Whitehead",
-			"savage",
-			"savag",
-			"jss",
-			"logo",
+			"robot",
+			"whitehead_modes_1958",
+			"dewey_reconstruction_1957",
+			"dewey",
+			"Data Forms of Thought",
 			"month",
 			"biagioli_situated_1999",
 			"munster",
@@ -513,10 +533,12 @@
 		],
 		"highlight": true,
 		"in_selection": false,
-		"preserve_case": true,
+		"preserve_case": false,
 		"regex": false,
 		"replace_history":
 		[
+			"req.json() ",
+			"pd",
 			"—"
 		],
 		"reverse": false,
@@ -533,25 +555,26 @@
 			[
 				{
 					"buffer": 0,
-					"file": "/home/mackenza/Documents/mirroring/Anonymous_youtube.py",
-					"semi_transient": true,
+					"file": "YT_api_generate.py",
+					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 7168,
+						"buffer_size": 2289,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								577,
-								577
+								115,
+								115
 							]
 						],
 						"settings":
 						{
-							"WordCountShouldRun": true,
-							"syntax": "Packages/Python/Python.tmLanguage"
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
@@ -564,7 +587,7 @@
 	],
 	"incremental_find":
 	{
-		"height": 41.0
+		"height": 34.0
 	},
 	"input":
 	{
@@ -597,6 +620,10 @@
 	{
 		"height": 142.0
 	},
+	"output.git":
+	{
+		"height": 142.0
+	},
 	"project": "mirroring.sublime-project",
 	"replace":
 	{
@@ -608,6 +635,10 @@
 		"height": 0.0,
 		"selected_items":
 		[
+			[
+				"pan",
+				"book/pandoc.sh"
+			]
 		],
 		"width": 0.0
 	},
@@ -618,7 +649,7 @@
 		[
 			[
 				"",
-				"~/R/coursera/linal/linal.sublime-project"
+				"/home/mackenza/Documents/data_intensive/book/data_book.sublime-project"
 			]
 		],
 		"width": 380.0
@@ -637,7 +668,7 @@
 	"show_minimap": true,
 	"show_open_files": true,
 	"show_tabs": true,
-	"side_bar_visible": false,
+	"side_bar_visible": true,
 	"side_bar_width": 338.0,
 	"status_bar_visible": true,
 	"template_settings":

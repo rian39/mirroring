@@ -16,7 +16,19 @@ YOUTUBE_API_VERSION = "v3"
 #sample get:
 #https://www.googleapis.com/youtube/v3/videos?id=7lCDEYXw3mM&key=AIzaSyBFAnShIZy8_McvshPS3o9uac8ZODaktcA&part=snippet,contentDetails,statistics,status
 
-def youtube_search(options, query = ''):
+
+def youtube_video(options, id):
+  youtube = build(YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VERSION,
+    developerKey=DEVELOPER_KEY)  
+
+  response = youtube.videos().list(
+    id = id,
+    part = 'id, statistics'
+  ).execute()
+  return response
+
+
+def youtube_search(options, query):
   youtube = build(YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VERSION,
     developerKey=DEVELOPER_KEY)
 
@@ -43,7 +55,7 @@ def youtube_search(options, query = ''):
       type='video',
       maxResults=options.maxResults
     ).execute()
-    dit={i['etag']:i['snippet'] for i in search_response['items']}
+    dit={i['id']['videoId']:i['snippet'] for i in search_response['items']}
     print ('getting another page of results ... ' + str(df.shape[0]))
     dft  = pd.DataFrame(dit.values(), index = dit.keys())
     df = df.append(dft, ignore_index=True)
@@ -59,13 +71,15 @@ def test():
   (options, args) = parser.parse_args()
   return youtube_search(options)
 
-if __name__ == "__main__":
+def setOptions():
   parser = OptionParser()
   parser.add_option("--q", dest="q", help="Search term",
     default="Google")
   parser.add_option("--max-results", dest="maxResults",
-    help="Max results", default=25)
-  
+    help="Max results", default=50)
   (options, args) = parser.parse_args()
+  return options
 
+if __name__ == "__main__":
+  options = setOptions()
   youtube_search(options)
