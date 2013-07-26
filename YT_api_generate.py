@@ -9,7 +9,7 @@ import pandas as pd
 # Set DEVELOPER_KEY to the "API key" value from the "Access" tab of the
 # Google APIs Console http://code.google.com/apis/console#access
 # Please ensure that you have enabled the YouTube Data API for your project.
-DEVELOPER_KEY = "AIzaSyBFAnShIZy8_McvshPS3o9uac8ZODaktcA"
+DEVELOPER_KEY = open('api.txt').readline()
 YOUTUBE_API_SERVICE_NAME = "youtube"
 YOUTUBE_API_VERSION = "v3"
 
