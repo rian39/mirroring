@@ -24,20 +24,33 @@ def youtube_search(options):
   di={i['etag']:i['snippet'] for i in search_response['items']}
   df = pd.DataFrame(di.values(), index = di.keys())
 
+  # to retrieve more pages
   nextPage = search_response['nextPageToken']
-  #need to retrieve more pages
 
-  search_response = youtube.search().list(
-    q=options.q,
-    part="id,snippet",
-    type='video',
-    pageToken = nextPage,
-    maxResults=options.maxResults
-  ).execute()
+  while nextPage != Null:
+    search_response = youtube.search().list(
+      q=options.q,
+      part="id,snippet",
+      type='video',
+      maxResults=options.maxResults
+    ).execute()
+    di={i['etag']:i['snippet'] for i in search_response['items']}
+    dft  = pd.DataFrame(di.values(), index = di.keys())
+    df = pd.concat(df, dft)
+    nextPage = search_response['nextPageToken']
 
-  di2={i['etag']:i['snippet'] for i in search_response['items']}
-  df2= pd.DataFrame(di.values(), index = di.keys())
-  df_full = pd.concat([df, df2])
+
+  # search_response = youtube.search().list(
+  #   q=options.q,
+  #   part="id,snippet",
+  #   type='video',
+  #   pageToken = nextPage,
+  #   maxResults=options.maxResults
+  # ).execute()
+
+  # di2={i['etag']:i['snippet'] for i in search_response['items']}
+  # df2= pd.DataFrame(di.values(), index = di.keys())
+  # df_full = pd.concat([df, df2])
 
   # videos = []
   # channels = []
