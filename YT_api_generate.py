@@ -1,5 +1,10 @@
+# %load_ext autoreload
+# %autoreload 2
+
+
 from apiclient.discovery import build
 from optparse import OptionParser
+import pandas as pd
 
 # Set DEVELOPER_KEY to the "API key" value from the "Access" tab of the
 # Google APIs Console http://code.google.com/apis/console#access
@@ -10,9 +15,13 @@ YOUTUBE_API_VERSION = "v3"
 
 #sample get:
 #https://www.googleapis.com/youtube/v3/videos?id=7lCDEYXw3mM&key=AIzaSyBFAnShIZy8_McvshPS3o9uac8ZODaktcA&part=snippet,contentDetails,statistics,status
-def youtube_search(options):
+
+def youtube_search(options, query = ''):
   youtube = build(YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VERSION,
     developerKey=DEVELOPER_KEY)
+
+  if query != '':
+    options.q = query
 
   search_response = youtube.search().list(
     q=options.q,
@@ -27,51 +36,28 @@ def youtube_search(options):
   # to retrieve more pages
   nextPage = search_response['nextPageToken']
 
-  while nextPage != None:
+  while nextPage != None and  df.shape[0] <5000:
     search_response = youtube.search().list(
       q=options.q,
       part="id,snippet",
       type='video',
       maxResults=options.maxResults
     ).execute()
-    di={i['etag']:i['snippet'] for i in search_response['items']}
-    dft  = pd.DataFrame(di.values(), index = di.keys())
-    df = pd.concat(df, dft)
+    dit={i['etag']:i['snippet'] for i in search_response['items']}
+    print ('getting another page of results ... ' + str(df.shape[0]))
+    dft  = pd.DataFrame(dit.values(), index = dit.keys())
+    df = df.append(dft, ignore_index=True)
     nextPage = search_response['nextPageToken']
   return df
 
-
-  # search_response = youtube.search().list(
-  #   q=options.q,
-  #   part="id,snippet",
-  #   type='video',
-  #   pageToken = nextPage,
-  #   maxResults=options.maxResults
-  # ).execute()
-
-  # di2={i['etag']:i['snippet'] for i in search_response['items']}
-  # df2= pd.DataFrame(di.values(), index = di.keys())
-  # df_full = pd.concat([df, df2])
-
-  # videos = []
-  # channels = []
-  # playlists = []
-
-  # for search_result in search_response.get("items", []):
-  #   if search_result["id"]["kind"] == "youtube#video":
-  #     videos.append("%s (%s)" % (search_result["snippet"]["title"],
-  #                                search_result["id"]["videoId"]))
-  #   elif search_result["id"]["kind"] == "youtube#channel":
-  #     channels.append("%s (%s)" % (search_result["snippet"]["title"],
-  #                                  search_result["id"]["channelId"]))
-  #   elif search_result["id"]["kind"] == "youtube#playlist":
-  #     playlists.append("%s (%s)" % (search_result["snippet"]["title"],
-  #                                   search_result["id"]["playlistId"]))
-
-  # print "Videos:\n", "\n".join(videos), "\n"
-  # print "Channels:\n", "\n".join(channels), "\n"
-  # print "Playlists:\n", "\n".join(playlists), "\n"
-
+def test():
+  parser = OptionParser()
+  parser.add_option("--q", dest="q", help="Search term",
+    default="Google")
+  parser.add_option("--max-results", dest="maxResults",
+    help="Max results", default=25)
+  (options, args) = parser.parse_args()
+  return youtube_search(options)
 
 if __name__ == "__main__":
   parser = OptionParser()
