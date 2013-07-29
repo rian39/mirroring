@@ -19,16 +19,38 @@
 # 
 # (3) scrape comments related to the videos/related videos retrieved (including user name, time and parent comments) 
 # The geo info are quite tricky cause there is no "nationality" associated to the video, but the language...at least not provided with the api! But maybe something can be inferred with a heuristic approach (nations mentioned in the title/description/comments)
+# 
+# ## Generating the data again
+# 
+# Checking how the youtube api works, the scripts I wrote allow any query
 
 # <codecell>
 
 import pandas as pd
+import YT_api_generate as yt
 from pylab import *
 from IPython.display import HTML
 from IPython.display import YouTubeVideo
 pd.set_option("display.max_columns", 6)
 pd.set_option("display.max_rows", 15)
 pd.set_option("display.notebook_repr_html", True)
+from optparse import OptionParser
+
+# <markdowncell>
+
+# Generating the data again
+# 
+# Checking how the youtube api works, the scripts I wrote allow any query on the youtube api: could be useful for tracking down other related topics
+
+# <codecell>
+
+query ='anonymous internet freedom'
+df =yt.youtube_search(query='anonymous',max_results=5000, with_statistics=True)
+
+# <codecell>
+
+print(df.shape)
+df.columns
 
 # <codecell>
 
@@ -101,6 +123,37 @@ video_df.VIEWS = video_df.VIEWS.replace('None', 0)
 views = video_df.VIEWS.order()
 f=figure(figsize(10,5))
 suptitle('Views of videos at different scale')
+sp1 = f.add_subplot(1,3,1)
+h1=sp1.hist(views, bins=100)
+sp1.set_ylabel('Number of videos')
+sp1.set_xlabel('Number of views')
+sp1.set_title('View high scale')
+sp2 = f.add_subplot(1,3,2)
+h2 = sp2.hist(views[views<100], bins=100)
+sp2.set_title('View on medium scale')
+sp2.set_ylabel('Number of videos')
+sp2.set_xlabel('Number of views')
+sp3 = f.add_subplot(1,3,3)
+h3 = sp3.hist(views[views<10], bins = 10)
+sp3.set_title('View on low scale')
+sp3.set_ylabel('Number of videos')
+sp3.set_xlabel('Number of views')
+
+# <markdowncell>
+
+# ### Running the same analysis with my dataset to check
+
+# <codecell>
+
+views=df.viewCount.astype('int32')
+
+# <codecell>
+
+
+views = df.viewCount.astype('int')
+views.head()
+f=figure(figsize=(10,5))
+suptitle('Views of videos at different scale (Mackenzie dataset)')
 sp1 = f.add_subplot(1,3,1)
 h1=sp1.hist(views, bins=100)
 sp1.set_ylabel('Number of videos')
