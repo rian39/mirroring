@@ -1,16 +1,14 @@
 # %load_ext autoreload
 # %autoreload 2
 
-
 from apiclient.discovery import build
-from optparse import OptionParser
-import pandas as pd
 import apiclient.errors
 import requests
 
 # Set DEVELOPER_KEY to the "API key" value from the "Access" tab of the
 # Google APIs Console http://code.google.com/apis/console#access
-# Please ensure that you have enabled the YouTube Data API for your project.
+# Please ensure that you have enabled the YouTube Data API.
+
 DEVELOPER_KEY = open('api.txt').readline()
 YOUTUBE_API_SERVICE_NAME = "youtube"
 YOUTUBE_API_VERSION = "v3"
@@ -20,6 +18,15 @@ YOUTUBE_API_VERSION = "v3"
 
 def youtube_get_video_details(videoIds):
 
+  """
+  returns a pd.DataFrame of details about given videos;
+  API only allows 50 ids at a time
+
+  Parameters
+  ---------------------------------------
+  videoId: list of videoIds
+  """
+
   base_url = 'https://www.googleapis.com/youtube/v3/videos?id='
   part_url = '&part=snippet,contentDetails,topicDetails,statistics,status'
   middle_url = ''.join(['&key=',DEVELOPER_KEY, part_url])
@@ -27,7 +34,7 @@ def youtube_get_video_details(videoIds):
   df = pd.DataFrame()
   for id_string in id_strings:
     full_url = ''.join([base_url,id_string,middle_url])
-    response = requests.get(full_url).json
+    response = requests.get(full_url).json()
     if 'items' in response:
       di1= {i['id']:i['statistics']  for i in response['items'] if i.has_key('statistics')}
       di2= {i['id']:i['contentDetails']  for i in response['items'] if i.has_key('contentDetails')}
@@ -40,17 +47,21 @@ def youtube_get_video_details(videoIds):
     print('getting video statistics: ' + str(df.shape[0]))
 
   df['videoId'] = df.index
+  df = format_durations(df)
   return df
-
 
 
 def youtube_video_details (videoId):
 
   """
   returns a pd.DataFrame of details about given videos;
-  API only allows 50 ids at a time
+  API only allows 50 ids at a time.
+  But this version often throws errors -- something to do with the 
+  apiclient.discovery module? Anyway, the function above - youtube_get_video_details
+  -- now does a better job
+
+  Parameters
   ---------------------------------------
-  options: the request parameters
   videoId: list of videoIds
   """
   youtube = build(YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VERSION,
@@ -93,6 +104,14 @@ def youtube_video_details (videoId):
   return df
 
 
+def format_durations(df):
+  if 'duration' in df.columns:
+    df.duration =[re.sub('H|M', ':', s) for s in [re.sub('PT|S', '', t)   for t in df.duration]]
+  else:
+    print 'no duration column in dataframe' + ', '.join(df.columns)
+  return df
+
+
 def youtube_search(query, max_results=1000, with_statistics = False):
 
   """
@@ -100,7 +119,6 @@ def youtube_search(query, max_results=1000, with_statistics = False):
 
   Parameters 
   ---------------------------------------------
-  options: the api options
   query: the query term
   max_results: the number of values to return
   with_statistics: whether to ask for viewing statistics
@@ -149,24 +167,3 @@ def youtube_search(query, max_results=1000, with_statistics = False):
   
   return df
 
-# def test():
-#   parser = OptionParser()
-#   parser.add_option("--q", dest="q", help="Search term",
-#     default="Google")
-#   parser.add_option("--max-results", dest="maxResults",
-#     help="Max results", default=25)
-#   (options, args) = parser.parse_args()
-#   return youtube_search(options)
-
-# def setOptions():
-#   parser = OptionParser()
-#   parser.add_option("--q", dest="q", help="Search term",
-#     default="Google")
-#   parser.add_option("--max-results", dest="maxResults",
-#     help="Max results", default=50)
-#   options= parser.parse_args()[0]
-#   return options
-
-# if __name__ == "__main__":
-#   options = setOptions()
-#   youtube_search(options)

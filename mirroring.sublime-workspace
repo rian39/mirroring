@@ -4,12 +4,20 @@
 		"selected_items":
 		[
 			[
-				"next",
-				"nextPageToken"
+				"co",
+				"columns"
 			],
 			[
-				"sear",
-				"search_response"
+				"df",
+				"df"
+			],
+			[
+				"you",
+				"youtube_get_video_details"
+			],
+			[
+				"di",
+				"discovery"
 			],
 			[
 				"Y_",
@@ -168,20 +176,19 @@
 	"buffers":
 	[
 		{
-			"file": "Anonymous_youtube.py",
+			"file": "YT_api_generate.py",
 			"settings":
 			{
-				"buffer_size": 10992,
+				"buffer_size": 5524,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "YT_api_generate.py",
+			"file": "api.txt",
 			"settings":
 			{
-				"buffer_size": 2532,
-				"line_ending": "Unix",
-				"name": "from apiclient.discovery import build"
+				"buffer_size": 39,
+				"line_ending": "Unix"
 			}
 		}
 	],
@@ -288,9 +295,6 @@
 	},
 	"file_history":
 	[
-		"/home/mackenza/.config/sublime-text-3/Packages/Default/Preferences.sublime-settings",
-		"/home/mackenza/.config/sublime-text-3/Packages/User/Preferences.sublime-settings",
-		"/home/mackenza/R/coursera/linal/mat.py",
 		"/home/mackenza/R/coursera/ml-ng/mlclass-ex2/ex2.R",
 		"/home/mackenza/R/coursera/ml-ng/ex1/computeCostMulti.m",
 		"/home/mackenza/Documents/data_intensive/transformation_soc_sci_oxford_2013/mackenzie_slides_oxford_feb_2013.Rmd",
@@ -430,7 +434,6 @@
 		"case_sensitive": true,
 		"find_history":
 		[
-			"parser.add_option(\"--max-results\", dest=\"maxResults\",\n    help=\"Max results\", default=25)\n  ",
 			"conway_machine_2012",
 			"conway",
 			"Ng",
@@ -549,16 +552,45 @@
 	"groups":
 	[
 		{
-			"selected": 1,
+			"selected": 0,
 			"sheets":
 			[
 				{
 					"buffer": 0,
-					"file": "Anonymous_youtube.py",
+					"file": "YT_api_generate.py",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 10992,
+						"buffer_size": 5524,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								3851,
+								3610
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 741.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "api.txt",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 39,
 						"regions":
 						{
 						},
@@ -571,43 +603,10 @@
 						],
 						"settings":
 						{
-							"WordCountShouldRun": true,
-							"syntax": "Packages/Python/Python.tmLanguage"
+							"syntax": "Packages/Text/Plain text.tmLanguage"
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 1,
-					"file": "YT_api_generate.py",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 2532,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								754,
-								754
-							]
-						],
-						"settings":
-						{
-							"WordCountShouldRun": true,
-							"auto_name": "from apiclient.discovery import build",
-							"syntax": "Packages/Python/Python.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true,
-							"word_wrap": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 25.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -690,7 +689,7 @@
 	"show_minimap": true,
 	"show_open_files": true,
 	"show_tabs": true,
-	"side_bar_visible": false,
+	"side_bar_visible": true,
 	"side_bar_width": 338.0,
 	"status_bar_visible": true,
 	"template_settings":
