@@ -4,20 +4,76 @@
 		"selected_items":
 		[
 			[
-				"co",
-				"columns"
+				"req",
+				"requests"
 			],
 			[
-				"df",
-				"df"
+				"vi",
+				"videoIds"
 			],
 			[
-				"you",
-				"youtube_get_video_details"
+				"ex",
+				"execute"
 			],
 			[
-				"di",
-				"discovery"
+				"query",
+				"query_function"
+			],
+			[
+				"try",
+				"try	Try/Except/Else"
+			],
+			[
+				"in",
+				"index"
+			],
+			[
+				"con",
+				"contentDetails"
+			],
+			[
+				"searc",
+				"search_response"
+			],
+			[
+				"yout",
+				"youtube_video_details"
+			],
+			[
+				"id_s",
+				"id_strings"
+			],
+			[
+				"id_",
+				"id_strings"
+			],
+			[
+				"vio",
+				"videoId"
+			],
+			[
+				"ke",
+				"keys"
+			],
+			[
+				"Data",
+				"DataFrame"
+			],
+			[
+				"ne",
+				"nextPage"
+			],
+			[
+				"max",
+				"max_results"
+			],
+			[
+				"next",
+				"nextPageToken"
+			],
+			[
+				"sear",
+				"search_response"
 			],
 			[
 				"Y_",
@@ -80,10 +136,6 @@
 				"unicode"
 			],
 			[
-				"try",
-				"try	Try/Except/Finally"
-			],
-			[
 				"sub",
 				"sub_dict"
 			],
@@ -102,10 +154,6 @@
 			[
 				"study_su",
 				"study_summary_df"
-			],
-			[
-				"query",
-				"query_runs"
 			],
 			[
 				"study",
@@ -176,11 +224,23 @@
 	"buffers":
 	[
 		{
+			"contents": "# -*- coding: utf-8 -*-\n# <nbformat>3.0</nbformat>\n\n# <markdowncell>\n\n# # Exploration of the Anonymous videos on Youtube. \n# \n# ## How the initial data was generated (by Davide Beraldo)\n# \n# The query: \"anonymous internet freedom\"\n# \n# Some notes: I have just discovered that some changes have been made to YT api, so the script was not able to retreive keywords associated with videos (that can be interesting for semantic network analysis purposed) and that videos descriptions are truncated. I will try to figure out whether is possible to fix the first shortcome; for the second, luckly the \"related videos\" descriptions are still complete..and usually there is wide redundancy, so maybe it can be easily overcame (consider that in this sample I restricted related videos to 25 for each); the comments are also in this case limited to 25; videos are ordered by relevance computed by Youtube itself; users are limited to original content submitters; the string I input as keyword was only \"anonymous internet freedom\".\n# \n# (1) retrieve up to 1000 videos queried by keywords (including username,date,category,n of favorites, n of views,duration, tags and description)\n# -maybe it is possible to extend the 1000 limit, or by the way it can be somehow done with the following module-\n# \n# (2) reconstruct the network of \"related videos\" for each video retrieved (with the metadata above)\n# -the alghoritm for matching related videos is of course not known, but as far as I understood it should be both related to tags and to users' behaviour: the more two videos are viewed in sequence, the more related they'll be... so it can provide interesting insights on network of content-\n# \n# (3) scrape comments related to the videos/related videos retrieved (including user name, time and parent comments) \n# The geo info are quite tricky cause there is no \"nationality\" associated to the video, but the language...at least not provided with the api! But maybe something can be inferred with a heuristic approach (nations mentioned in the title/description/comments)\n# \n# ## Generating the data again\n# \n# Checking how the youtube api works, the scripts I wrote allow any query\n\n# <codecell>\n\nimport pandas as pd\nimport YT_api_generate as yt\nfrom pylab import *\nfrom IPython.display import HTML\nfrom IPython.display import YouTubeVideo\npd.set_option(\"display.max_columns\", 6)\npd.set_option(\"display.max_rows\", 15)\npd.set_option(\"display.notebook_repr_html\", True)\nfrom optparse import OptionParser\n\n# <markdowncell>\n\n# Generating the data again\n# \n# Checking how the youtube api works, the scripts I wrote allow any query on the youtube api: could be useful for tracking down other related topics\n\n# <codecell>\n\nquery ='anonymous internet freedom'\ndf =yt.youtube_search(query='anonymous',max_results=5000, with_statistics=True)\n\n# <codecell>\n\nprint(df.shape)\ndf.columns\n\n# <codecell>\n\nan_f = pd.ExcelFile('data/anonymouys internet freedom - VIDEOS.xls')\nan_dict = {name:an_f.parse(name) for name in an_f.sheet_names}\nvideo_df = an_dict['VIDEOS']#c\nolean up data a bit\nvideo_df.VIEWS = video_df.VIEWS.replace('None', 0)\nvideo_df.shape\n\n# <codecell>\n\nprint('Users: ', len(video_df.USER.unique()))\nprint('Titles: ', len(video_df.TITLE.unique()))\n\n# <markdowncell>\n\n# ## Shape of the video data\n# \n# There are 908 titles in the dataset, of which 283 are unique. There are 246 users -- people (robots?) who upload videos.\n\n# <markdowncell>\n\n# ## The length of the videos\n# \n# Not sure what the length of videos tells us. Something about the kind of object we are dealing with. Also, I guess length affects mirroring. Would many people upload a 60 minute documentary?\n\n# <codecell>\n\nduration = video_df.DURATION.order().tolist()\nduration = [d/60 for d in duration]\nf = pylab.figure(figsize=(10,5))\nsp=f.add_subplot(1,1,1)\n\nh=sp.hist(duration, bins=100)\nprint('Less than 10 minutes: '+ str(float(sum(video_df.DURATION/60 < 10))/video_df.DURATION.shape[0]*100)+ '%')\nsp.set_title('Length of videos (minutes)')\nsp.set_xlabel('minutes')\nsp.set_ylabel('videos')\nYouTubeVideo(video_df.ID.iloc[1])\n\n# <markdowncell>\n\n# This looks like most of the videos are relatively short (less than 10 minutes). Does duration correlate with either viewing or duplication?\n\n# <codecell>\n\nfig=figure(dpi=200)\nsp = fig.add_subplot(1,1,1)\nsp.scatter(video_df.DURATION/60, video_df.VIEWS, s=5,marker='o')\nsp.set_title('Duration vs Views')\nsp.set_xlabel('Duration (minutes)')\nsp.set_ylabel('Views')\nsp.set_xlim(0, 200)\nsp.set_ylim(0, 1e7)\n\n# <markdowncell>\n\n# At a glance, it looks like the longer videos are viewed much less. Very short videos are not viewed much either. But this doesn't take into account the fact that there are many more short videos. \n\n# <markdowncell>\n\n# # Viewing figures\n# \n# Another way to look at videos -- more in terms of reception. What stands out here?\n\n# <codecell>\n\nvideo_df.VIEWS = video_df.VIEWS.replace('None', 0)\nviews = video_df.VIEWS.order()\nf=figure(figsize(10,5))\nsuptitle('Views of videos at different scale')\nsp1 = f.add_subplot(1,3,1)\nh1=sp1.hist(views, bins=100)\nsp1.set_ylabel('Number of videos')\nsp1.set_xlabel('Number of views')\nsp1.set_title('View high scale')\nsp2 = f.add_subplot(1,3,2)\nh2 = sp2.hist(views[views<100], bins=100)\nsp2.set_title('View on medium scale')\nsp2.set_ylabel('Number of videos')\nsp2.set_xlabel('Number of views')\nsp3 = f.add_subplot(1,3,3)\nh3 = sp3.hist(views[views<10], bins = 10)\nsp3.set_title('View on low scale')\nsp3.set_ylabel('Number of videos')\nsp3.set_xlabel('Number of views')\n\n# <markdowncell>\n\n# ### Running the same analysis with my dataset to check\n\n# <codecell>\n\nviews=df.viewCount.astype('int32')\n\n# <codecell>\n\n\nviews = df.viewCount.astype('int')\nviews.head()\nf=figure(figsize=(10,5))\nsuptitle('Views of videos at different scale (Mackenzie dataset)')\nsp1 = f.add_subplot(1,3,1)\nh1=sp1.hist(views, bins=100)\nsp1.set_ylabel('Number of videos')\nsp1.set_xlabel('Number of views')\nsp1.set_title('View high scale')\nsp2 = f.add_subplot(1,3,2)\nh2 = sp2.hist(views[views<100], bins=100)\nsp2.set_title('View on medium scale')\nsp2.set_ylabel('Number of videos')\nsp2.set_xlabel('Number of views')\nsp3 = f.add_subplot(1,3,3)\nh3 = sp3.hist(views[views<10], bins = 10)\nsp3.set_title('View on low scale')\nsp3.set_ylabel('Number of videos')\nsp3.set_xlabel('Number of views')\n\n# <markdowncell>\n\n# As usual, most videos are only viewed by a small number of people, and a couple are viewed by 100,000s up to 14 million. Actually, viewing figures are quite widely distributed even for the less-viewed videos. It might be interesting to look at the videos that are viewed 8, 30 or 80 times as well as the ones viewed 14 millon times. This analysis _does not_ take into account view figures for copies of videos.\n# \n# ## The most viewed videos\n# \n# If we aggregate views for videos with the same title, things start to look different. \n\n# <codecell>\n\ntop_views = video_df.loc[video_df.VIEWS>100000, ['TITLE', 'VIEWS']]\ngby=top_views.groupby(by='TITLE')['VIEWS']\nprint('total viewings:'+str(video_df['VIEWS'].sum()))\nprint('total views of top videos:', sum(gby.sum()))\nprint('total views of top 5 videos:', sum(gby.sum()[:4]))\n\nprint(gby.ngroups)\ngbyo=gby.sum().order(ascending=False)\npie(gbyo[0:9], labels=gbyo.keys()[0:9])\npylab.title('Most viewed videos in terms of view share')\npd.DataFrame(gbyo).head(n=5)\n\n# <markdowncell>\n\n# There are 18 videos that each have more 100,00 views. There have been around 480 million views in total of Anonymous-related videos. The top 18 videos account for 477 million of the views. The top 5 videos account for 460 million of the 480 million. \n# Looking at the titles, is the 'Emmanuel Kelly X Factor 2011 Auditions' video 'noise'? Maybe not -- he's an Iraqi orphan living in Australia, and 'Collateral Murder - Wikileaks - Iraq' (#2) doesn't look like that. The top four videos after Kelly's all have more than 50 million viewings. So they dominate the total views of Anonymous videos. \n\n# <codecell>\n\n#video_df.TITLE.\nemmanuel_kelly = video_df.ID[video_df.TITLE == gbyo.index[0]]\nYouTubeVideo(emmanuel_kelly.iloc[0])\n\n# <markdowncell>\n\n# ## Are video duplicates viewed?\n# \n# Are views related to duplication/mirroring practices? First, we need to find the duplicates. Title is an ok starting point. Presumably, videos with the same title are likely to be duplicates.\n\n# <codecell>\n\ntitle = video_df.TITLE.tolist()\nvideo_df.TITLE = [t.encode('utf8', errors='ignore') for t in title]\nprint('distinct titles:', len(video_df.TITLE.unique()))\nprint('distinct ids', len(video_df.ID.unique()))\nprint('distinct durations:', len(video_df.DURATION.unique()))\n\n# <markdowncell>\n\n# While there are 908 videos listed, there are only 283 distinctly titled videos and 289 distinct video IDS. That means that potentially ~620 are copies. But if copies have the same ID, does that mean that they have been uploaded? Or are they simply different views on the same video? This is a crucial question - are we dealing here with duplicates or just references to one instance?  \n# Things are a bit more complicated in the duration data. There are only 220 distinct durations. But it could be that different videos happen to have the same duration. \n# What are the most commonly duplicated videos?\n\n# <codecell>\n\ndup_video_counts =video_df.TITLE.value_counts()\ndup_df = pd.DataFrame(dup_video_counts.head())\ndup_df\n\n# <codecell>\n\ntop_dup_video_counts=dup_video_counts[dup_video_counts>5]\ntop_dup_video_counts = top_dup_video_counts.order(ascending=False)\ntop_dup_videos = dup_video_counts.index\ntop_dup_video_counts\n\n# <markdowncell>\n\n# Does duplication correlate with viewing figures? Do these duplicates get the same number of views? Or are some versions much more widely viewed than others?\n\n# <codecell>\n\ndup_views=video_df.loc[video_df.TITLE.isin(top_dup_videos), ['TITLE', 'VIEWS']]\ndup_views['copies'] = top_dup_video_counts\ndv =pd.DataFrame(dup_views.groupby(['TITLE'])['VIEWS'].sum().order(ascending=False))\ndv.head()\n\n# <markdowncell>\n\n# Some interesting points here. High rates of duplication does not equate with high view counts. What is the Christopher Hitchens piece? It is the 4th most duplicated video, but shows 0 views - is that possible? More importantly, the most duplicated video 'Anonymous - Truth is a Virus' only has 1380 views.\n# \n# ## TBC -- look at views and copies side by side\n\n# <markdowncell>\n\n# ## Some stuff on users\n\n# <codecell>\n\nvideo_df.columns\nvideo_df['USER'].unique().shape\n\n# <markdowncell>\n\n# So there are 246 users (people?) who upload videos. How much do they upload?\n\n# <codecell>\n\nuser_counts = video_df['USER'].value_counts()\nf3 = figure(figsize=(5,3))\nsp=f3.add_subplot(111)\nh4 = sp.hist(video_df['USER'].value_counts(), bins=100)\nsp.set_title('Number of videos per user')\ntop_users = user_counts[user_counts>5].index\ntop_users\nprint(user_counts.describe())\nuser_counts.quantile(0.6)\n\n# <markdowncell>\n\n# So, more than 60% of people upload less than 2 videos. \n\n# <markdowncell>\n\n# ## How top contributing users upload top-viewed videos -- that is, do they duplicate them? \n# \n# I'm calling 'top users' anyone who uploads more than 5 videos, and 'top videos' any video that is duplicated more than 5 times. \n\n# <codecell>\n\ntopuser_toptitle=pd.crosstab(video_df[video_df.USER.isin(top_users)]['USER'], video_df[video_df.TITLE.isin(top_dup_videos)]['TITLE'])\ntop_user_title_df = pd.DataFrame(topuser_toptitle.sum(axis=1).order(ascending=False))\ntop_user_title_df.head()\n\n# <markdowncell>\n\n# This suggests that there is some link between between uploading a lot and duplicating a lot. I'm not sure about this actually -- needs further thought. There is still the question of whether the duplicates are viewed a lot. And do these high duplicating users duplicate the same videos?\n\n# <markdowncell>\n\n# ## What is viewed\n# \n# Many questions could be asked here. For highly duplicated videos, are all copies viewed at similar levels or not?\n\n# <codecell>\n\ndate = pd.to_datetime(video_df.DATA)\nvideo_df.DATA = date\nvideo_df.groupby(by=['TITLE'])['VIEWS'].sum().order()\n\n# <codecell>\n\nf = figure(figsize=(8,6), dpi=400)\ns = f.add_subplot(111)\ns.scatter(date, video_df.VIEWS)\ns.set_title('Viewing activity over time')\ns.set_ylabel('Views')\n\ntop_views.head()\n\n# <markdowncell>\n\n# Hard to see what is happening in the viewing of these videos. \n\n",
+			"file": "Anonymous_youtube.py",
+			"file_size": 12327,
+			"file_write_time": 130194099902694763,
+			"settings":
+			{
+				"buffer_size": 12328,
+				"line_ending": "Unix"
+			}
+		},
+		{
 			"file": "YT_api_generate.py",
 			"settings":
 			{
 				"buffer_size": 5524,
-				"line_ending": "Unix"
+				"line_ending": "Unix",
+				"name": "from apiclient.discovery import build"
 			}
 		},
 		{
@@ -189,6 +249,15 @@
 			{
 				"buffer_size": 39,
 				"line_ending": "Unix"
+			}
+		},
+		{
+			"contents": "https://www.googleapis.com/youtube/v3/videos?id=7lCDEYXw3mM&key=AIzaSyBFAnShIZy8_McvshPS3o9uac8ZODaktcA&part=snippet,contentDetails,statistics,status,topicDetails\n",
+			"settings":
+			{
+				"buffer_size": 163,
+				"line_ending": "Unix",
+				"name": "https://www.googleapis.com/youtube/v3/videos?id=7l"
 			}
 		}
 	],
@@ -295,6 +364,21 @@
 	},
 	"file_history":
 	[
+		"/tmp/savedrecs-1.txt",
+		"/home/mackenza/Documents/imaginaries_cesagen_2010/data/savedrecs(1).txt",
+		"/home/mackenza/Documents/imaginaries_cesagen_2010/data/savedrecs(8).txt",
+		"/tmp/savedrecs.txt",
+		"/home/mackenza/Documents/imaginaries_cesagen_2010/history.wos",
+		"/home/mackenza/Downloads/savedrecs(1).txt",
+		"/home/mackenza/.cache/.fr-rXle19/nbconvert-173bb08dd86d02a7485801969c94d4816913cd09/README.rst",
+		"/home/mackenza/Downloads/nbconvert_install/nbconvert.py",
+		"/home/mackenza/Downloads/nbconvert_install/README.rst",
+		"/home/mackenza/.cache/.fr-F8rJys/nbconvert-173bb08dd86d02a7485801969c94d4816913cd09/nbconvert1/work_flow.txt",
+		"/home/mackenza/Documents/mirroring/api.txt",
+		"/home/mackenza/Documents/mirroring/.gitignore.txt",
+		"/home/mackenza/.config/sublime-text-3/Packages/Default/Preferences.sublime-settings",
+		"/home/mackenza/.config/sublime-text-3/Packages/User/Preferences.sublime-settings",
+		"/home/mackenza/R/coursera/linal/mat.py",
 		"/home/mackenza/R/coursera/ml-ng/mlclass-ex2/ex2.R",
 		"/home/mackenza/R/coursera/ml-ng/ex1/computeCostMulti.m",
 		"/home/mackenza/Documents/data_intensive/transformation_soc_sci_oxford_2013/mackenzie_slides_oxford_feb_2013.Rmd",
@@ -407,16 +491,7 @@
 		"/home/mackenza/.config/sublime-text-2/Packages/User/untitled.sublime-snippet",
 		"/home/mackenza/Dropbox/data-economy/paper/4S EASST talk.docx",
 		"/home/mackenza/Desktop/build.R",
-		"/home/mackenza/Desktop/test3.md",
-		"/home/mackenza/Desktop/test4.R",
-		"/home/mackenza/Desktop/test2.mdown",
-		"/home/mackenza/Desktop/test1.md",
-		"/home/mackenza/R/montecarlo/data/refs.bib",
-		"/home/mackenza/Desktop/test6.rmd",
-		"/home/mackenza/R/ngs/data/geo_schema.sql",
-		"/home/mackenza/Desktop/test.sublime-project",
-		"/media/0031-014A/Documents/supervision/xaroula/chapter 2 attempt.doc",
-		"/home/mackenza/Desktop/scrivener-manual-a4.pdf"
+		"/home/mackenza/Desktop/test3.md"
 	],
 	"find":
 	{
@@ -434,6 +509,10 @@
 		"case_sensitive": true,
 		"find_history":
 		[
+			"title",
+			"nextPageToken",
+			"videoId",
+			"parser.add_option(\"--max-results\", dest=\"maxResults\",\n    help=\"Max results\", default=25)\n  ",
 			"conway_machine_2012",
 			"conway",
 			"Ng",
@@ -552,45 +631,16 @@
 	"groups":
 	[
 		{
-			"selected": 0,
+			"selected": 1,
 			"sheets":
 			[
 				{
 					"buffer": 0,
-					"file": "YT_api_generate.py",
+					"file": "Anonymous_youtube.py",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 5524,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								3851,
-								3610
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Python/Python.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 741.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 1,
-					"file": "api.txt",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 39,
+						"buffer_size": 12328,
 						"regions":
 						{
 						},
@@ -603,6 +653,95 @@
 						],
 						"settings":
 						{
+							"WordCountShouldRun": true,
+							"syntax": "Packages/Python/Python.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "YT_api_generate.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 5524,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								39,
+								39
+							]
+						],
+						"settings":
+						{
+							"WordCountShouldRun": true,
+							"auto_name": "from apiclient.discovery import build",
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true,
+							"word_wrap": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "api.txt",
+					"semi_transient": true,
+					"settings":
+					{
+						"buffer_size": 39,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								39,
+								39
+							]
+						],
+						"settings":
+						{
+							"WordCountShouldRun": true,
+							"syntax": "Packages/Text/Plain text.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 163,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"WordCountShouldRun": true,
+							"auto_name": "https://www.googleapis.com/youtube/v3/videos?id=7l",
 							"syntax": "Packages/Text/Plain text.tmLanguage"
 						},
 						"translation.x": 0.0,
