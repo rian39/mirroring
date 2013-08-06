@@ -5,9 +5,11 @@
 
 # # Exploration of the Anonymous videos on Youtube. 
 # 
-# ## How the initial data was generated (by Davide Beraldo)
+# ## How the initial data was generated - Davide's dataset
 # 
-# The query: "anonymous internet freedom"
+# Here's what Davide wrote in his email:
+# 
+# > The query: "anonymous internet freedom"
 # 
 # Some notes: I have just discovered that some changes have been made to YT api, so the script was not able to retreive keywords associated with videos (that can be interesting for semantic network analysis purposed) and that videos descriptions are truncated. I will try to figure out whether is possible to fix the first shortcome; for the second, luckly the "related videos" descriptions are still complete..and usually there is wide redundancy, so maybe it can be easily overcame (consider that in this sample I restricted related videos to 25 for each); the comments are also in this case limited to 25; videos are ordered by relevance computed by Youtube itself; users are limited to original content submitters; the string I input as keyword was only "anonymous internet freedom".
 # 
@@ -20,9 +22,18 @@
 # (3) scrape comments related to the videos/related videos retrieved (including user name, time and parent comments) 
 # The geo info are quite tricky cause there is no "nationality" associated to the video, but the language...at least not provided with the api! But maybe something can be inferred with a heuristic approach (nations mentioned in the title/description/comments)
 # 
-# ## Generating the data again
+
+# <markdowncell>
+
+# ## Generating the data from Youtube API -- Adrian's dataset
 # 
-# Checking how the youtube api works, the scripts I wrote allow any query
+# Davide's dataset is really useful, but I found it hard to replicate the same results. The scripts I wrote to query the YT api bring back different results. This needs to be investigated.
+# Also because Google/Youtube only returns a maximum of 1000 results, we need to think of ways of 'tiling' the queries to get around this limitation. At least, so that we can be reasonably satisfied we are getting all the relevant videos.
+
+# <codecell>
+
+%load_ext autoreload
+%autoreload 2
 
 # <codecell>
 
@@ -36,22 +47,6 @@ pd.set_option("display.max_rows", 15)
 pd.set_option("display.notebook_repr_html", True)
 from optparse import OptionParser
 
-# <markdowncell>
-
-# Generating the data again
-# 
-# Checking how the youtube api works, the scripts I wrote allow any query on the youtube api: could be useful for tracking down other related topics
-
-# <codecell>
-
-query ='anonymous internet freedom'
-df =yt.youtube_search(query='anonymous',max_results=5000, with_statistics=True)
-
-# <codecell>
-
-print(df.shape)
-df.columns
-
 # <codecell>
 
 an_f = pd.ExcelFile('data/anonymouys internet freedom - VIDEOS.xls')
@@ -59,18 +54,87 @@ an_dict = {name:an_f.parse(name) for name in an_f.sheet_names}
 video_df = an_dict['VIDEOS']
 #clean up data a bit
 video_df.VIEWS = video_df.VIEWS.replace('None', 0)
-video_df.shape
-
-# <codecell>
-
-print('Users: ', len(video_df.USER.unique()))
-print('Titles: ', len(video_df.TITLE.unique()))
+print(video_df.shape)
+print(video_df.head(10))
 
 # <markdowncell>
 
-# ## Shape of the video data
+# The dataset has about a 1000 rows, but many seem duplicates. That is, the rows are literally identical in every field So cutting those out: ... 
+
+# <codecell>
+
+video_df = video_df.drop_duplicates()
+print(video_df.shape)
+print('Users: ', len(video_df.USER.unique()))
+print('Titles: ', len(video_df.TITLE.str.encode('utf-8').unique()))
+
+# <markdowncell>
+
+# There are 908 titles in the Beraldo dataset, of which **283** are unique. There are 246 users -- people (robots?) who upload videos. 
 # 
-# There are 908 titles in the dataset, of which 283 are unique. There are 246 users -- people (robots?) who upload videos.
+# Comparing Davide's results with the ones I get from the Youtube API:
+
+# <codecell>
+
+df_am = yt.youtube_search(query='anonymous,internet,freedom', max_results=1000, with_statistics=True)
+
+# <codecell>
+
+df_am.columns
+df_am.drop_duplicates(inplace=True, cols='videoId')
+print(df_am.shape)
+print('Titles: ', len(df_am.title))
+
+# <markdowncell>
+
+# So not a huge difference in numbers -- 283 vs 366. But are they the same videos more or less? 
+
+# <codecell>
+
+davide_set = set(video_df.ID.tolist())
+adrian_set = set(df_am.videoId.tolist())
+comb_id = davide_set.union(adrian_set)
+intersecting_id = adrian_set.intersection(davide_set)
+adrian_unique = adrian_set.difference(davide_set)
+davide_unique = davide_set.difference(adrian_set)
+print('Set of combined video ids: ' + str(len(comb_id)))
+print('They have ' + str(len(intersecting_id)) + ' in common')
+print('Davide datatset has ' + str(len(davide_unique)) + ' that Adrian doesnt')
+print('Adrian has ' + str(len(adrian_unique)) + ' that Davide doesnt')
+
+# <markdowncell>
+
+# So it looks like there is in **poor overlap** between them. Altogether there are 525 unique video ids, but 25% are common to both. The rest are different. How to explain this? If Davide used the Youtube API like I did, does this mean that Google is giving different results to different people? Or that the results depend on when/where you run the query? The question of getting the same data is maybe only an interesting methodological wrinkle, or it might be something worth investigating in its own right. 
+# 
+# I'll leave this aside for the moment, and just focus on Davide's dataset. 
+
+# <markdowncell>
+
+# # The uniqueness of the videos
+# 
+# But once all the dupicates are removed, it seems we are left with a unique list of 283 videos, and they are not mirrored at all. Here are the mirrored videos:
+
+# <codecell>
+
+vc=video_df.TITLE.value_counts()
+vc[vc>1]; 
+
+# <markdowncell>
+
+# That's it in Davide's dataset: 3 copies of 'Anonymous Declaration of Freedom,' and 2 of the rest. **5** mirrored videos, and not highly mirrored. 
+# 
+# To check the same in Adrian's dataset -- are they the duplicated ones there too?
+
+# <codecell>
+
+vc2 = df_am.title.value_counts()
+vc2[vc2>1]
+
+# <markdowncell>
+
+# Here there is a bit more duplication, and some overlap. There are also some time-specific results -- PRISM and Snowden probably arrives after Davide has generated his dataset. But still only 8 mirrored videos.
+# 
+# I guess we should discuss this Adam. Should we look for more hidden duplicates? Is it something to do with the youtube search? Are there other ways of identifying videos associated with Anonymous that need to look into. 
 
 # <markdowncell>
 
@@ -80,26 +144,49 @@ print('Titles: ', len(video_df.TITLE.unique()))
 
 # <codecell>
 
+#davide's videos
 duration = video_df.DURATION.order().tolist()
 duration = [d/60 for d in duration]
 f = pylab.figure(figsize=(10,5))
-sp=f.add_subplot(1,1,1)
+sp=f.add_subplot(1,2,1)
 
 h=sp.hist(duration, bins=100)
 print('Less than 10 minutes: '+ str(float(sum(video_df.DURATION/60 < 10))/video_df.DURATION.shape[0]*100)+ '%')
-sp.set_title('Length of videos (minutes)')
+sp.set_title('Length of videos (minutes) - Davide')
 sp.set_xlabel('minutes')
 sp.set_ylabel('videos')
+#adrian's videos
+df_am = yt.format_durations(df_am)
+df_am.columns
+#df_am['duration_second'].hist(bins=100)
+sp2=f.add_subplot(1,2,2)
+sp2.set_title('Length of videos (minutes) - Adrian')
+sp2.set_xlabel('minutes')
+sp2.set_ylabel('videos')
+dur_min = df_am.duration_second/60
+h2 = sp2.hist(dur_min, bins=100)
 YouTubeVideo(video_df.ID.iloc[1])
 
 # <markdowncell>
 
-# This looks like most of the videos are relatively short (less than 10 minutes). Does duration correlate with either viewing or duplication?
+# Again, the differences between the datasets. But can't see any pattern here.
+# 
+# In general, it looks like most of the videos are relatively short (less than 10 minutes). Does duration correlate with either viewing or duplication?
 
 # <codecell>
 
 fig=figure(dpi=200)
-sp = fig.add_subplot(1,1,1)
+sp = fig.add_subplot(1,2,1)
+sp.scatter(video_df.DURATION/60, video_df.VIEWS, s=5,marker='o')
+sp.set_title('Duration vs Views')
+sp.set_xlabel('Duration (minutes)')
+sp.set_ylabel('Views')
+sp.set_xlim(0, 200)
+sp.set_ylim(0, 1e7)
+
+hms =[re.sub('H|M', ':', s) for s in [re.sub('PT|S', '', t)   for t in df_am.duration]]
+
+sp = fig.add_subplot(1,2,2)
 sp.scatter(video_df.DURATION/60, video_df.VIEWS, s=5,marker='o')
 sp.set_title('Duration vs Views')
 sp.set_xlabel('Duration (minutes)')
@@ -115,14 +202,17 @@ sp.set_ylim(0, 1e7)
 
 # # Viewing figures
 # 
-# Another way to look at videos -- more in terms of reception. What stands out here?
+# Another way to look at videos -- more in terms of reception. Does anything stand out from the viewing figures?
+# 
+# As usually, totally different results from the Adrian dataset -- maximum view is 66 million, not 14 million
 
 # <codecell>
 
 video_df.VIEWS = video_df.VIEWS.replace('None', 0)
 views = video_df.VIEWS.order()
+print('Maximum views: ' + str(views.max()))
 f=figure(figsize(10,5))
-suptitle('Views of videos at different scale')
+suptitle('Views of videos at different scale: Davide dataset')
 sp1 = f.add_subplot(1,3,1)
 h1=sp1.hist(views, bins=100)
 sp1.set_ylabel('Number of videos')
@@ -139,19 +229,9 @@ sp3.set_title('View on low scale')
 sp3.set_ylabel('Number of videos')
 sp3.set_xlabel('Number of views')
 
-# <markdowncell>
-
-# ### Running the same analysis with my dataset to check
-
-# <codecell>
-
-views=df.viewCount.astype('int32')
-
-# <codecell>
-
-
-views = df.viewCount.astype('int')
-views.head()
+#Adrian dataset
+views = df_am.viewCount.astype('int').order()
+print('Max views in adrian dataset: ' + str(views.max()))
 f=figure(figsize=(10,5))
 suptitle('Views of videos at different scale (Mackenzie dataset)')
 sp1 = f.add_subplot(1,3,1)
@@ -165,10 +245,11 @@ sp2.set_title('View on medium scale')
 sp2.set_ylabel('Number of videos')
 sp2.set_xlabel('Number of views')
 sp3 = f.add_subplot(1,3,3)
-h3 = sp3.hist(views[views<10], bins = 10)
+h3 = sp3.hist(views[views<10])
 sp3.set_title('View on low scale')
 sp3.set_ylabel('Number of videos')
 sp3.set_xlabel('Number of views')
+
 
 # <markdowncell>
 
@@ -191,6 +272,22 @@ gbyo=gby.sum().order(ascending=False)
 pie(gbyo[0:9], labels=gbyo.keys()[0:9])
 pylab.title('Most viewed videos in terms of view share')
 pd.DataFrame(gbyo).head(n=5)
+
+# <codecell>
+
+# for the Adrian dataset
+df_am.viewCount = df_am.viewCount.astype('int32')
+top_views_am = df_am.loc[df_am.viewCount>100000, ['title', 'viewCount']]
+gby_am=top_views_am.groupby(by='title')['viewCount']
+print('total viewings:'+str(df_am['viewCount'].sum()))
+print('total views of top videos:', sum(gby_am.sum()))
+print('total views of top 5 videos:', sum(gby_am.sum()[:4]))
+
+print(gby_am.ngroups)
+gbyo_am=gby_am.sum().order(ascending=False)
+pie(gbyo_am[0:9], labels=gbyo_am.keys()[0:9])
+pylab.title('Most viewed videos in terms of view share (Adrian dataset)')
+pd.DataFrame(gbyo_am).head(n=5)
 
 # <markdowncell>
 
@@ -250,8 +347,6 @@ dv.head()
 # <markdowncell>
 
 # Some interesting points here. High rates of duplication does not equate with high view counts. What is the Christopher Hitchens piece? It is the 4th most duplicated video, but shows 0 views - is that possible? More importantly, the most duplicated video 'Anonymous - Truth is a Virus' only has 1380 views.
-# 
-# ## TBC -- look at views and copies side by side
 
 # <markdowncell>
 
@@ -319,6 +414,17 @@ s.set_title('Viewing activity over time')
 s.set_ylabel('Views')
 
 top_views.head()
+
+# <codecell>
+
+## Overviews of the data
+
+# <codecell>
+
+df_am.columns
+# df_am.commentCount.astype('int64').hist()
+
+df_am[['commentCount', 'dislikeCount', 'favoriteCount', 'viewCount', 'duration_second']].astype('int64').hist(bins=100)
 
 # <markdowncell>
 

@@ -4,6 +4,10 @@
 from apiclient.discovery import build
 import apiclient.errors
 import requests
+import pandas as pd 
+import re
+import datetime
+from datetime import datetime, timedelta
 
 # Set DEVELOPER_KEY to the "API key" value from the "Access" tab of the
 # Google APIs Console http://code.google.com/apis/console#access
@@ -34,7 +38,7 @@ def youtube_get_video_details(videoIds):
   df = pd.DataFrame()
   for id_string in id_strings:
     full_url = ''.join([base_url,id_string,middle_url])
-    response = requests.get(full_url).json()
+    response = requests.get(full_url).json
     if 'items' in response:
       di1= {i['id']:i['statistics']  for i in response['items'] if i.has_key('statistics')}
       di2= {i['id']:i['contentDetails']  for i in response['items'] if i.has_key('contentDetails')}
@@ -47,7 +51,7 @@ def youtube_get_video_details(videoIds):
     print('getting video statistics: ' + str(df.shape[0]))
 
   df['videoId'] = df.index
-  df = format_durations(df)
+  # df = format_durations(df)
   return df
 
 
@@ -105,12 +109,27 @@ def youtube_video_details (videoId):
 
 
 def format_durations(df):
-  if 'duration' in df.columns:
-    df.duration =[re.sub('H|M', ':', s) for s in [re.sub('PT|S', '', t)   for t in df.duration]]
-  else:
-    print 'no duration column in dataframe' + ', '.join(df.columns)
+  """YouTube API durations come in the form 'PT34M22S'
+  This function formats them as times, and returns a DataFrame
+  with a time column added
+  """
+  splitter = re.compile('\D{1,3}')
+  dur = df.duration.apply(splitter.split)
+  hms = list()
+  for d in dur:  
+    if len(d) == 4:
+      hms.append(datetime.strptime(':'.join([e.zfill(2) for e in d]), "%H:%M:%S:%f"))
+    elif len(d) == 5:
+      hms.append(datetime.strptime(':'.join([e.zfill(2) for e in d]), "%W:%H:%M:%S:%f"))
+    elif len(d) == 3:
+      hms.append(datetime.strptime(':'.join([e.zfill(2) for e in d]), "%M:%S:%f"))
+  df['duration_time'] = hms
+  df['duration_second'] = df['duration_time'].apply(lambda x:  x.hour*3600+x.minute*60 + x.second)
   return df
 
+def convert(s):
+             t = datetime.strptime(s, "%M:%S")
+             return t.minute*60 + t.second
 
 def youtube_search(query, max_results=1000, with_statistics = False):
 
