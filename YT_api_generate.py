@@ -38,7 +38,7 @@ def youtube_get_video_details(videoIds):
   df = pd.DataFrame()
   for id_string in id_strings:
     full_url = ''.join([base_url,id_string,middle_url])
-    response = requests.get(full_url).json
+    response = requests.get(full_url).json()
     if 'items' in response:
       di1= {i['id']:i['statistics']  for i in response['items'] if i.has_key('statistics')}
       di2= {i['id']:i['contentDetails']  for i in response['items'] if i.has_key('contentDetails')}

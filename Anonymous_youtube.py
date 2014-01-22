@@ -5,21 +5,19 @@
 
 # # Exploration of the Anonymous videos on Youtube. 
 # 
-# ## How the initial data was generated - Davide's dataset
+# ## How the initial data was generated - Davide's dataset -- generate in July 2013
 # 
 # Here's what Davide wrote in his email:
 # 
 # > The query: "anonymous internet freedom"
 # 
-# Some notes: I have just discovered that some changes have been made to YT api, so the script was not able to retreive keywords associated with videos (that can be interesting for semantic network analysis purposed) and that videos descriptions are truncated. I will try to figure out whether is possible to fix the first shortcome; for the second, luckly the "related videos" descriptions are still complete..and usually there is wide redundancy, so maybe it can be easily overcame (consider that in this sample I restricted related videos to 25 for each); the comments are also in this case limited to 25; videos are ordered by relevance computed by Youtube itself; users are limited to original content submitters; the string I input as keyword was only "anonymous internet freedom".
+# > Some notes: I have just discovered that some changes have been made to YT api, so the script was not able to retreive keywords associated with videos (that can be interesting for semantic network analysis purposed) and that videos descriptions are truncated. I will try to figure out whether is possible to fix the first shortcome; for the second, luckly the "related videos" descriptions are still complete..and usually there is wide redundancy, so maybe it can be easily overcame (consider that in this sample I restricted related videos to 25 for each); the comments are also in this case limited to 25; videos are ordered by relevance computed by Youtube itself; users are limited to original content submitters; the string I input as keyword was only "anonymous internet freedom".
 # 
-# (1) retrieve up to 1000 videos queried by keywords (including username,date,category,n of favorites, n of views,duration, tags and description)
-# -maybe it is possible to extend the 1000 limit, or by the way it can be somehow done with the following module-
+# > (1) retrieve up to 1000 videos queried by keywords (including username,date,category,n of favorites, n of views,duration, tags and description)-maybe it is possible to extend the 1000 limit, or by the way it can be somehow done with the following module-
 # 
-# (2) reconstruct the network of "related videos" for each video retrieved (with the metadata above)
-# -the alghoritm for matching related videos is of course not known, but as far as I understood it should be both related to tags and to users' behaviour: the more two videos are viewed in sequence, the more related they'll be... so it can provide interesting insights on network of content-
+# > (2) reconstruct the network of "related videos" for each video retrieved (with the metadata above)-the alghoritm for matching related videos is of course not known, but as far as I understood it should be both related to tags and to users' behaviour: the more two videos are viewed in sequence, the more related they'll be... so it can provide interesting insights on network of content-
 # 
-# (3) scrape comments related to the videos/related videos retrieved (including user name, time and parent comments) 
+# > (3) scrape comments related to the videos/related videos retrieved (including user name, time and parent comments) 
 # The geo info are quite tricky cause there is no "nationality" associated to the video, but the language...at least not provided with the api! But maybe something can be inferred with a heuristic approach (nations mentioned in the title/description/comments)
 # 
 
@@ -29,6 +27,8 @@
 # 
 # Davide's dataset is really useful, but I found it hard to replicate the same results. The scripts I wrote to query the YT api bring back different results. This needs to be investigated.
 # Also because Google/Youtube only returns a maximum of 1000 results, we need to think of ways of 'tiling' the queries to get around this limitation. At least, so that we can be reasonably satisfied we are getting all the relevant videos.
+# 
+# Felipe: use list of campaigns to script a set of queries that build a bigger dataset
 
 # <codecell>
 
@@ -40,6 +40,7 @@
 import pandas as pd
 import YT_api_generate as yt
 from pylab import *
+import seaborn
 from IPython.display import HTML
 from IPython.display import YouTubeVideo
 pd.set_option("display.max_columns", 6)
@@ -67,10 +68,11 @@ video_df = video_df.drop_duplicates()
 print(video_df.shape)
 print('Users: ', len(video_df.USER.unique()))
 print('Titles: ', len(video_df.TITLE.str.encode('utf-8').unique()))
+print('IDS: ', len(video_df.ID.unique()))
 
 # <markdowncell>
 
-# There are 908 titles in the Beraldo dataset, of which **283** are unique. There are 246 users -- people (robots?) who upload videos. 
+# There are 908 titles in the Beraldo dataset, of which **289** are unique. There are 246 users -- people (robots?) who upload videos. 
 # 
 # Comparing Davide's results with the ones I get from the Youtube API:
 
@@ -83,11 +85,11 @@ df_am = yt.youtube_search(query='anonymous,internet,freedom', max_results=1000, 
 df_am.columns
 df_am.drop_duplicates(inplace=True, cols='videoId')
 print(df_am.shape)
-print('Titles: ', len(df_am.title))
+print 'Unique ids: ', len(df_am.videoId.unique())
 
 # <markdowncell>
 
-# So not a huge difference in numbers -- 283 vs 366. But are they the same videos more or less? 
+# So not a huge difference in numbers -- 525 vs 289. But are they the same videos more or less? 
 
 # <codecell>
 
@@ -104,31 +106,39 @@ print('Adrian has ' + str(len(adrian_unique)) + ' that Davide doesnt')
 
 # <markdowncell>
 
-# So it looks like there is in **poor overlap** between them. Altogether there are 525 unique video ids, but 25% are common to both. The rest are different. How to explain this? If Davide used the Youtube API like I did, does this mean that Google is giving different results to different people? Or that the results depend on when/where you run the query? The question of getting the same data is maybe only an interesting methodological wrinkle, or it might be something worth investigating in its own right. 
+# So it looks like there is in **poor overlap** between them. Altogether there are around 700 unique video ids, but 25% are common to both. The rest are different. How to explain this? If Davide used the Youtube API like I did, does this mean that Google is giving different results to different people? Or that the results depend on when/where you run the query? The question of getting the same data is maybe only an interesting methodological wrinkle, or it might be something worth investigating in its own right. 
 # 
-# I'll leave this aside for the moment, and just focus on Davide's dataset. 
+# I'll leave this aside for the moment, and just combine them both into one dataset.  
+
+# <codecell>
+
+#combine all the ids and titles from Davide and Adrian's results
+video_df['videoId'] = video_df.ID
+video_df['title'] = video_df.TITLE.str.encode('utf-8')
+video_df['duration_second'] = video_df.DURATION
+
+
+video_comb = pd.concat([df_am[['videoId', 'title', 'duration_second']], video_df[['videoId','title', 'duration_second']]], axis=0, ignore_index=True)
+video_comb = video_comb.drop_duplicates()
+video_comb.shape
 
 # <markdowncell>
 
 # # The uniqueness of the videos
 # 
-# But once all the dupicates are removed, it seems we are left with a unique list of 283 videos, and they are not mirrored at all. Here are the mirrored videos:
+# But once all the dupicates are removed, it seems we are left with a unique list of videos, and **they are not mirrored very much at all.** Is that right? Video-IDs means that there is no real mirroring? A key question, because it would undermine the whole mirroring strategy. 
+# 
+# Here are the mirrored videos:
 
 # <codecell>
 
-vc=video_df.TITLE.value_counts()
-vc[vc>1]; 
+
+vc=video_comb.title.value_counts()
+vc[vc>1]
 
 # <markdowncell>
 
-# That's it in Davide's dataset: 3 copies of 'Anonymous Declaration of Freedom,' and 2 of the rest. **5** mirrored videos, and not highly mirrored. 
-# 
-# To check the same in Adrian's dataset -- are they the duplicated ones there too?
-
-# <codecell>
-
-vc2 = df_am.title.value_counts()
-vc2[vc2>1]
+# That's it in combined's dataset: 5 copies of 'Anonymous Declaration of Freedom,' and 2 of the rest. **5** mirrored videos, and not highly mirrored. 
 
 # <markdowncell>
 
@@ -144,34 +154,40 @@ vc2[vc2>1]
 
 # <codecell>
 
-#davide's videos
-duration = video_df.DURATION.order().tolist()
+# renaming dataframes
+video_df = video_comb
+
+duration = video_df.duration_second.order().tolist()
 duration = [d/60 for d in duration]
 f = pylab.figure(figsize=(10,5))
-sp=f.add_subplot(1,2,1)
+sp=f.add_subplot(1,1,1)
 
 h=sp.hist(duration, bins=100)
-print('Less than 10 minutes: '+ str(float(sum(video_df.DURATION/60 < 10))/video_df.DURATION.shape[0]*100)+ '%')
+print('Less than 10 minutes: '+ str(float(sum(video_df.duration_second/60 < 10))/video_df.duration_second.shape[0]*100)+ '%')
 sp.set_title('Length of videos (minutes) - Davide')
 sp.set_xlabel('minutes')
 sp.set_ylabel('videos')
 #adrian's videos
-df_am = yt.format_durations(df_am)
-df_am.columns
-#df_am['duration_second'].hist(bins=100)
-sp2=f.add_subplot(1,2,2)
-sp2.set_title('Length of videos (minutes) - Adrian')
-sp2.set_xlabel('minutes')
-sp2.set_ylabel('videos')
-dur_min = df_am.duration_second/60
-h2 = sp2.hist(dur_min, bins=100)
-YouTubeVideo(video_df.ID.iloc[1])
+# df_am = yt.format_durations(df_am)
+# df_am.columns
+# #df_am['duration_second'].hist(bins=100)
+# sp2=f.add_subplot(1,2,2)
+# sp2.set_title('Length of videos (minutes) - Adrian')
+# sp2.set_xlabel('minutes')
+# sp2.set_ylabel('videos')
+# dur_min = df_am.duration_second/60
+# h2 = sp2.hist(dur_min, bins=100)
+YouTubeVideo(video_df.videoId.iloc[1])
 
 # <markdowncell>
 
 # Again, the differences between the datasets. But can't see any pattern here.
 # 
 # In general, it looks like most of the videos are relatively short (less than 10 minutes). Does duration correlate with either viewing or duplication?
+
+# <markdowncell>
+
+# ## Felipe: EVERYTHING BELOW HERE IS NOT RELEVANT AT THE MOMENT OR NEEDS FIXING
 
 # <codecell>
 

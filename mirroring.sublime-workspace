@@ -357,6 +357,7 @@
 	},
 	"file_history":
 	[
+		"/home/mackenza/Documents/signature.txt",
 		"/home/mackenza/Documents/mirroring/Anonymous_youtube.py",
 		"/tmp/savedrecs-1.txt",
 		"/home/mackenza/Documents/imaginaries_cesagen_2010/data/savedrecs(1).txt",
@@ -483,8 +484,7 @@
 		"/home/mackenza/Dropbox/data-economy/paper/pandoc_format_paper.sh",
 		"/home/mackenza/Dropbox/ngs_paper/build/pandoc.sublime-build",
 		"/home/mackenza/.config/sublime-text-2/Packages/User/untitled.sublime-snippet",
-		"/home/mackenza/Dropbox/data-economy/paper/4S EASST talk.docx",
-		"/home/mackenza/Desktop/build.R"
+		"/home/mackenza/Dropbox/data-economy/paper/4S EASST talk.docx"
 	],
 	"find":
 	{
@@ -657,7 +657,7 @@
 							"word_wrap": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 2279.0,
+						"translation.y": 1175.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
