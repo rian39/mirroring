@@ -138,7 +138,7 @@ def youtube_search(query, max_results=1000, with_statistics = False):
 
   Parameters 
   ---------------------------------------------
-  query: the query term
+  query: the query terms, comma separated
   max_results: the number of values to return
   with_statistics: whether to ask for viewing statistics
   """

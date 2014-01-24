@@ -231,7 +231,7 @@
 			"file": "YT_api_generate.py",
 			"settings":
 			{
-				"buffer_size": 6224,
+				"buffer_size": 6226,
 				"line_ending": "Unix",
 				"name": "from apiclient.discovery import build"
 			}
@@ -241,7 +241,8 @@
 			"settings":
 			{
 				"buffer_size": 39,
-				"line_ending": "Unix"
+				"line_ending": "Unix",
+				"name": "AIzaSyAEaWvXp69WuDlHMah2lQZ6Wui2ix6ZDo4"
 			}
 		},
 		{
@@ -636,15 +637,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 6224,
+						"buffer_size": 6226,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								4380,
-								4380
+								45,
+								45
 							]
 						],
 						"settings":
@@ -657,15 +658,16 @@
 							"word_wrap": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 1175.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
+					"stack_index": 0,
 					"type": "text"
 				},
 				{
 					"buffer": 1,
 					"file": "api.txt",
-					"semi_transient": true,
+					"semi_transient": false,
 					"settings":
 					{
 						"buffer_size": 39,
@@ -681,13 +683,14 @@
 						],
 						"settings":
 						{
-							"WordCountShouldRun": true,
+							"auto_name": "AIzaSyAEaWvXp69WuDlHMah2lQZ6Wui2ix6ZDo4",
 							"syntax": "Packages/Text/Plain text.tmLanguage"
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
+					"stack_index": 1,
 					"type": "text"
 				},
 				{
@@ -716,6 +719,7 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
+					"stack_index": 2,
 					"type": "text"
 				}
 			]
@@ -756,6 +760,10 @@
 	{
 		"height": 142.0
 	},
+	"output.find_results":
+	{
+		"height": 0.0
+	},
 	"project": "mirroring.sublime-project",
 	"replace":
 	{
@@ -777,7 +785,7 @@
 		[
 			[
 				"",
-				"~/Documents/data_intensive/book/data_book.sublime-project"
+				"/media/0031-014A/Documents/data_intensive/book/data_book.sublime-workspace"
 			]
 		],
 		"width": 380.0
