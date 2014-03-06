@@ -1,0 +1,16 @@
+
+ - Video Suggestion and Discovery for YouTube: Taking
+Random Walks Through the View Graph
+
+ - Finding Meaning on YouTube: Tag Recommendation and Category Discovery
+
+ - YouTubeCat: Learning to Categorize Wild Web Videos
+
+ - Discriminative Tag Learning on YouTube Videos with Latent Sub-tags
+ 
+ - YouTubeEvent: on Large-Scale Video Event Classification
+
+ - Automatically Discovering Talented Musicians with
+Acoustic Analysis of YouTube Videos
+
+ - The YouTube Video Recommendation System

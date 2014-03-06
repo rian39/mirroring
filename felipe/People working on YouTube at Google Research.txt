@@ -1,0 +1,39 @@
+
+People working at Google Research with YouTube:
+
+
+Jay Yagnik
+Ankur Jain
+Yu He
+D. Sivakumar
+Yang Song
+Ming Zhao
+Ullas Gargi
+Deepak Ravichandran
+Shankar Kumar
+Shumeet Baluja
+Yuchung Cheng
+Monia Ghobadi
+Hrishikesh Aradhye
+George Toderici
+Matt Mathis
+Thomas K. Leung
+
+
+
+Work less related to YouTube:
+
+Hector Yee
+Ron J. Weiss
+Andrew Tomkins
+Jason Weston
+Alon Y. Halevy
+Nandita Dukkipati
+Ed H. Chi
+Kurt Alfred Kluever
+Ana Radovanovic
+William D Heavlin
+
+
+
+
