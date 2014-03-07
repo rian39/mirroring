@@ -48,7 +48,8 @@ def youtube_get_video_details(videoIds):
       dft3 = pd.DataFrame(di3.values(), index= di3.keys())
       dft = pd.concat([dft1, dft2, dft3], axis=1)
       df = df.append(dft)
-    print('getting video statistics: ' + str(df.shape[0]))
+  
+  # print('Video statistics: ' + str(df.shape[0]))
 
   df['videoId'] = df.index
   # df = format_durations(df)
@@ -168,21 +169,22 @@ def youtube_search(query, max_results=1000, with_statistics = False):
       maxResults=50
     ).execute()
     dit={i['id']['videoId']:i['snippet'] for i in search_response['items']}
-    print ('getting another page of results ... ' + str(df.shape[0]))
     dft  = pd.DataFrame(dit.values(), index = dit.keys())
     df = df.append(dft, ignore_index=False)
   
   df['videoId'] = df.index
-  
-  if with_statistics:
-    df_stats = youtube_get_video_details(df.videoId)
-    print(df_stats.shape)
-    print(df.shape)
-    df = pd.merge(df, df_stats)
+  print ('retrieved ' + str(df.shape[0]) + ' results for ' + query)
+  #check if any rows are returned
+  if df.shape[0] >0:
+    if with_statistics:
+      df_stats = youtube_get_video_details(df.videoId)
+      print(query, df_stats.shape)
+      print(df.shape)
+      df = pd.merge(df, df_stats)
 
-  #cleaning up
-  df.title=[t.encode('utf8', errors='ignore') for t in df.title]
-  df.description=[t.encode('utf8', errors='ignore') for t in df.description]
+    #cleaning up
+    df.title=[t.encode('utf8', errors='ignore') for t in df.title]
+    df.description=[t.encode('utf8', errors='ignore') for t in df.description]
   
   return df
 

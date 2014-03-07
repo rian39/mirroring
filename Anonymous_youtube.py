@@ -41,6 +41,7 @@ import pandas as pd
 import YT_api_generate as yt
 from pylab import *
 import seaborn
+import re
 from IPython.display import HTML
 from IPython.display import YouTubeVideo
 pd.set_option("display.max_columns", 6)
