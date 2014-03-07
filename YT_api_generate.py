@@ -186,18 +186,6 @@ def youtube_search(query, max_results=1000, with_statistics = False):
     #cleaning up
     df.title=[t.encode('utf8', errors='ignore') for t in df.title]
     df.description=[t.encode('utf8', errors='ignore') for t in df.description]
-
-  
-  if with_statistics:
-    df_stats = youtube_get_video_details(df.videoId)
-    print(query, df_stats.shape)
-    print(df.shape)
-    df = pd.merge(df, df_stats)
-
-  #cleaning up
-  df.title=[t.encode('utf8', errors='ignore') for t in df.title]
-  df.description=[t.encode('utf8', errors='ignore') for t in df.description]
->>>>>>> 13926bbc10053ee9b712b1aa2891d25ba80c6eb9
   
   return df
 
