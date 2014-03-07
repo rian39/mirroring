@@ -240,6 +240,10 @@
 			"file": "data/query list",
 			"settings":
 			{
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 13926bbc10053ee9b712b1aa2891d25ba80c6eb9
 				"buffer_size": 2413,
 				"line_ending": "Unix"
 			}
@@ -258,6 +262,11 @@
 			{
 				"buffer_size": 2383,
 				"line_ending": "Unix"
+=======
+				"buffer_size": 39,
+				"line_ending": "Unix",
+				"name": "AIzaSyAEaWvXp69WuDlHMah2lQZ6Wui2ix6ZDo4"
+>>>>>>> 87088b1c83528bce809cf546f443b9c997c8ec87
 			}
 		},
 		{
@@ -659,8 +668,18 @@
 						"selection":
 						[
 							[
+<<<<<<< HEAD
 								1910,
 								1910
+=======
+<<<<<<< HEAD
+								1910,
+								1910
+=======
+								45,
+								45
+>>>>>>> 87088b1c83528bce809cf546f443b9c997c8ec87
+>>>>>>> 13926bbc10053ee9b712b1aa2891d25ba80c6eb9
 							]
 						],
 						"settings":
@@ -673,15 +692,36 @@
 							"word_wrap": true
 						},
 						"translation.x": 0.0,
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 13926bbc10053ee9b712b1aa2891d25ba80c6eb9
 						"translation.y": 1017.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 2,
+<<<<<<< HEAD
+=======
+=======
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+>>>>>>> 87088b1c83528bce809cf546f443b9c997c8ec87
+>>>>>>> 13926bbc10053ee9b712b1aa2891d25ba80c6eb9
 					"type": "text"
 				},
 				{
 					"buffer": 1,
+<<<<<<< HEAD
 					"file": "data/query list",
+=======
+<<<<<<< HEAD
+					"file": "data/query list",
+=======
+					"file": "api.txt",
+>>>>>>> 87088b1c83528bce809cf546f443b9c997c8ec87
+>>>>>>> 13926bbc10053ee9b712b1aa2891d25ba80c6eb9
 					"semi_transient": false,
 					"settings":
 					{
@@ -698,6 +738,13 @@
 						],
 						"settings":
 						{
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+							"auto_name": "AIzaSyAEaWvXp69WuDlHMah2lQZ6Wui2ix6ZDo4",
+>>>>>>> 87088b1c83528bce809cf546f443b9c997c8ec87
+>>>>>>> 13926bbc10053ee9b712b1aa2891d25ba80c6eb9
 							"syntax": "Packages/Text/Plain text.tmLanguage"
 						},
 						"translation.x": 0.0,
@@ -789,7 +836,15 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
+<<<<<<< HEAD
 					"stack_index": 4,
+=======
+<<<<<<< HEAD
+					"stack_index": 4,
+=======
+					"stack_index": 2,
+>>>>>>> 87088b1c83528bce809cf546f443b9c997c8ec87
+>>>>>>> 13926bbc10053ee9b712b1aa2891d25ba80c6eb9
 					"type": "text"
 				}
 			]
@@ -855,7 +910,15 @@
 		[
 			[
 				"",
+<<<<<<< HEAD
 				"~/Dropbox/mcs_methods/mcs.sublime-project"
+=======
+<<<<<<< HEAD
+				"~/Dropbox/mcs_methods/mcs.sublime-project"
+=======
+				"/media/0031-014A/Documents/data_intensive/book/data_book.sublime-workspace"
+>>>>>>> 87088b1c83528bce809cf546f443b9c997c8ec87
+>>>>>>> 13926bbc10053ee9b712b1aa2891d25ba80c6eb9
 			]
 		],
 		"width": 380.0

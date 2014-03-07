@@ -139,7 +139,7 @@ def youtube_search(query, max_results=1000, with_statistics = False):
 
   Parameters 
   ---------------------------------------------
-  query: the query term
+  query: the query terms, comma separated
   max_results: the number of values to return
   with_statistics: whether to ask for viewing statistics
   """
@@ -174,6 +174,7 @@ def youtube_search(query, max_results=1000, with_statistics = False):
   
   df['videoId'] = df.index
   print ('retrieved ' + str(df.shape[0]) + ' results for ' + query)
+<<<<<<< HEAD
   #check if any rows are returned
   if df.shape[0] >0:
     if with_statistics:
@@ -185,6 +186,18 @@ def youtube_search(query, max_results=1000, with_statistics = False):
     #cleaning up
     df.title=[t.encode('utf8', errors='ignore') for t in df.title]
     df.description=[t.encode('utf8', errors='ignore') for t in df.description]
+=======
+  
+  if with_statistics:
+    df_stats = youtube_get_video_details(df.videoId)
+    print(query, df_stats.shape)
+    print(df.shape)
+    df = pd.merge(df, df_stats)
+
+  #cleaning up
+  df.title=[t.encode('utf8', errors='ignore') for t in df.title]
+  df.description=[t.encode('utf8', errors='ignore') for t in df.description]
+>>>>>>> 13926bbc10053ee9b712b1aa2891d25ba80c6eb9
   
   return df
 
