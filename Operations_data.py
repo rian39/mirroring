@@ -30,7 +30,7 @@ pd.set_option("display.notebook_repr_html", True)
 # 
 # ## What we'd like to produce:
 # 
-# 1. A quantitative description of how many mirrored videos exist, when they were published and on what topics
+# 1. A quantitative description of how many mirrored videos exist, when they were published and on what topics (that is, operations)
 # 2. A timeline of mirroring events associated with Anonymous. The timeline should describe their relative importance
 # 
 # 
@@ -77,18 +77,6 @@ for op in operations_mirror:
     df  = yt.youtube_search(op,1000, True)
     df['operation'] = op
     df_ops = df_ops.append(df)
-
-# <codecell>
-
-df  = yt.youtube_search(operations[-1],1000, True)
-df['operation'] = operations[-1]
-df_ops = df_ops.append(df)
-
-# <codecell>
-
-df  = yt.youtube_search(operations_mirror[-1],1000, True)
-df['operation'] = operations_mirror[-1]
-df_ops = df_ops.append(df)
 
 # <codecell>
 
@@ -146,7 +134,7 @@ ops_no_dups.head()
 
 # ## Identifying mirrors
 # 
-# This leaves a dataset that has no duplicateresults (i.e rows). Finding mirrored videos is potentially harder. Trying to think this through:
+# This leaves a dataset that has no duplicaten results (i.e rows). Finding mirrored videos is potentially harder. Trying to think this through:
 # 
 # 1. If durations are the same and the titles overlap, we probably have a mirror. The practical problem here is finding the overlapping titles. Slightly different wordings for titles will be hard to track. And what about people who completely drop the titles when they mirror? This requires some slightly clever matching. 
 # 2. Conversely, distinguish videos that have the same title but are different videos. They will have different durations. Obviously descriptions, number of comments, etc, are likely to be different.
@@ -155,6 +143,20 @@ ops_no_dups.head()
 # <markdowncell>
 
 # ### Using titles to find duplicates
+
+# <codecell>
+
+def title_clean_operations(ops_df):
+    
+    # clean up the operations in terms of duplicates,
+    # only include videos whose title starts with 'anomymous operation
+    # returns a dataframe with title_clean column
+    ops = ops_df.drop_duplicates(cols = ['publishedAt', 'videoId'])
+    ops['title_clean'] = ops.title.str.lower().str.replace('\\W+|#|-', ' ').str.strip()
+    ops = ops.ix[ops.title_clean.str.startswith('anonymous operation')]
+    # this line gets the first 4 words 
+    ops['title_short'] = ops.title_clean.map(lambda x: ' '.join(re.split(' ', x)[:3]))
+    return ops
 
 # <codecell>
 
@@ -176,10 +178,44 @@ ops['title_clean'] = ops.title.str.lower().str.replace('\\W+', ' ').str.strip()
 
 # <codecell>
 
-# the pure operations videos
-# videos that have the 'anonymous operation x' pattern
-ops_pure = ops.ix[ops.title_clean.str.contains('anonymous operation')]
-ops_pure.shape
+ops_cl = title_clean_operations(ops)
+ops_cl = yt.format_durations(ops_cl)
+ti_du = ops_cl.groupby('title_short')['duration_time'].value_counts()
+print(ti_du.sum())
+
+# <markdowncell>
+
+# Working with these 2600 videos, we can get an idea of the extent and distribution of mirrors. 
+# 
+# ## The main mirrors
+# 
+# Looking at the top 100 mirrored operation videos, we get this kind of distribution
+
+# <codecell>
+
+print(len(ti_du[ti_du>5]))
+ti_du[ti_du>5].plot(kind='barh',figsize=(10,16))
+
+# <markdowncell>
+
+# ### Minor mirrors
+# 
+# Some videos are only mirrored a couple of times
+
+# <codecell>
+
+print(len(ti_du[ti_du <= 4]))
+ti_du[ti_du <= 4].plot(kind='barh',figsize=(10,14))
+
+# <markdowncell>
+
+# Sorting mirrored videos according to publication dates
+
+# <codecell>
+
+ops_cl['publishedAt'] = pd.to_datetime(ops_cl.publishedAt)
+first_publication = ops_cl.groupby(by = ['title_short', 'duration_time']).publishedAt.min()
+print(first_publication)
 
 # <markdowncell>
 
@@ -188,8 +224,8 @@ ops_pure.shape
 # <codecell>
 
 # might be better to cross check with other fields such as duration, publishedAt, etc
-ops_pure = yt.format_durations(ops_pure)
-ops_pure.duration_second.value_counts().plot(kind='bar')
+
+ops_cl.duration_time.value_counts().plot(kind='barh', figsize=(10,14))
 
 # <codecell>
 
@@ -212,7 +248,7 @@ def mirror_match
 # <codecell>
 
 print('Most mirrored operations:\n')
-print(ops_pure.title_clean.value_counts()[:10])
+print(ops_cl.title_clean.value_counts()[:10])
 
 # <codecell>
 
@@ -226,7 +262,7 @@ print(ops_pure.title_clean.value_counts()[-10:])
 # <codecell>
 
 pl = plt.figure(figsize = (10,4))
-title_counts = ops_pure.title_clean.value_counts().values
+title_counts = ops_cl.title_clean.value_counts().values
 title_counts = title_counts[title_counts>1]
 xval = range(0,len(title_counts))
 yval = title_counts

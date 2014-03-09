@@ -125,8 +125,12 @@ def format_durations(df):
     elif len(d) == 3:
       hms.append(datetime.strptime(':'.join([e.zfill(2) for e in d]), "%M:%S:%f"))
   df['duration_time'] = hms
-  df['duration_second'] = df['duration_time'].apply(lambda x:  x.hour*3600+x.minute*60 + x.second)
+  df['duration_time'] = df['duration_time'].map(lambda x: timedelta(hours = x.hour, minutes  = x.minute, seconds =x.second))
+
+  # format publishedAt
+  df['publishedAt'] = pd.to_datetime(df['publishedAt'])
   return df
+
 
 def convert(s):
              t = datetime.strptime(s, "%M:%S")
@@ -186,6 +190,32 @@ def youtube_search(query, max_results=1000, with_statistics = False):
     #cleaning up
     df.title=[t.encode('utf8', errors='ignore') for t in df.title]
     df.description=[t.encode('utf8', errors='ignore') for t in df.description]
-  
+    df.publishedAt = pd.to_datetime(df.publishedAt)
   return df
 
+
+def title_clean_operations(ops_df):
+    
+    """ clean up the operations in terms of duplicates,
+    only include videos whose title starts with 'anomymous operation
+    returns a dataframe with title_clean column and title_short column
+    """
+    ops = ops_df.drop_duplicates(cols = ['publishedAt', 'videoId'])
+    ops['title_clean'] = ops.title.str.lower().str.replace('\W+|[[#-_]]*', ' ').str.strip()
+    ops = ops.ix[ops.title_clean.str.startswith('anonymous operation')]
+    # this line gets the first 4 words 
+    ops['title_short'] = ops.title_clean.map(lambda x: ' '.join(re.split(' ', x)[:3]))
+    return ops
+
+def get_thumbnails(ops_df):
+  """
+  Beginning of a function that will fetch video thumbnails, save them
+  and then add urls, etc for the videos.
+  """
+  thumbs = [d['medium']['url'] for d in ops_df.thumbnails.tolist()]
+
+  for i in range(0, len(thumbs)):
+    im = requests.get(thumbs[i])
+    f=open('images/'+str(i)+'.jpg', 'wb')
+    f.write(im.content)
+    f.close()
