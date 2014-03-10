@@ -11,18 +11,6 @@ import pafy
 
 # <codecell>
 
-pafy.Pafy?
-
-# <codecell>
-
-pafy.Pafy('thumbs = [d['medium']['url'] for d in ops_pure.thumbnails.tolist()]
-
-# <codecell>
-
-pafy.Pafy('TOgk9WW1Q8c')
-
-# <codecell>
-
 vid = pafy.Pafy('TOgk9WW1Q8c')
 
 # <codecell>
@@ -47,63 +35,27 @@ vid.description
 
 # <codecell>
 
-vid.getbest()
-
-# <codecell>
-
-ls
-
-# <codecell>
-
-vid.getbest?
-
-# <codecell>
-
 best = vid.getbest()
-
-# <codecell>
-
-best.download?
 
 # <codecell>
 
 best.download('images/test.mp4')
 
-# <codecell>
+# <markdowncell>
 
-dir
-
-# <codecell>
-
-dir()
-
-# <codecell>
-
-ls()
-
-# <codecell>
-
-ls
+# ## Plotting the operations in terms of how many videos comprise an operation and how they are mirrored
 
 # <codecell>
 
 %load_ext autoreload
-
-# <codecell>
-
 %autoreload 2
 
 # <codecell>
 
 import YT_api_generate as yt
-
-# <codecell>
-
 import pandas as pd
-
-# <codecell>
-
 import re
+import numpy as np
 
 # <codecell>
 
@@ -132,15 +84,15 @@ operation_duration = end - start
 
 # <codecell>
 
-operation_duration.describe()
-
-# <codecell>
-
 operation_duration[operation_duration>0]
 
 # <codecell>
 
 mirror_count = ops.groupby(['title_short', 'duration_time']).publishedAt.count()
+
+# <codecell>
+
+ops.groupby(['title_short', 'duration_time']).viewCount.max()
 
 # <codecell>
 
@@ -181,11 +133,7 @@ opnames = op_dur_count_df_plot.index.get_level_values(0).tolist()
 
 # <codecell>
 
-import numpy as np
-
-# <codecell>
-
-widt = op_dur_count_df_plot['duration'].map(lambda x: x/np.timedelta64(1, 'D')).tolist()
+widt = op_dur_count_df_plot['duration'].map(lambda x: np.round(x/np.timedelta64(1, 'D'), decimals = 1)).tolist()
 
 # <codecell>
 
@@ -194,7 +142,11 @@ lef = op_dur_count_df_plot.start.tolist()
 
 # <codecell>
 
-%matplotlib
+x_labs = pd.date_range(start = start.min(), end = end.max(), freq = 'M')
+
+# <codecell>
+
+%matplotlib 
 import matplotlib.pyplot as plt
 import seaborn
 
