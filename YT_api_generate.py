@@ -20,8 +20,7 @@ YOUTUBE_API_VERSION = "v3"
 #sample get:
 #https://www.googleapis.com/youtube/v3/videos?id=7lCDEYXw3mM&key=YOUR_API_KEY&part=snippet,contentDetails,statistics,status
 
-def youtube_get_video_details(videoIds):
-
+def youtube_search(videoId):
   """
   returns a pd.DataFrame of details about given videos;
   API only allows 50 ids at a time
@@ -38,16 +37,20 @@ def youtube_get_video_details(videoIds):
   df = pd.DataFrame()
   for id_string in id_strings:
     full_url = ''.join([base_url,id_string,middle_url])
-    response = requests.get(full_url).json()
-    if 'items' in response:
-      di1= {i['id']:i['statistics']  for i in response['items'] if i.has_key('statistics')}
-      di2= {i['id']:i['contentDetails']  for i in response['items'] if i.has_key('contentDetails')}
-      dft1= pd.DataFrame(di1.values(), index= di1.keys())
-      dft2 = pd.DataFrame(di2.values(), index= di2.keys())
-      di3= {i['id']:i['topicDetails'] for i in response['items'] if i.has_key('topicDetails')}
-      dft3 = pd.DataFrame(di3.values(), index= di3.keys())
-      dft = pd.concat([dft1, dft2, dft3], axis=1)
-      df = df.append(dft)
+    try:
+      response = requests.get(full_url).json()
+      if 'items' in response:
+        di1= {i['id']:i['statistics']  for i in response['items'] if i.has_key('statistics')}
+        di2= {i['id']:i['contentDetails']  for i in response['items'] if i.has_key('contentDetails')}
+        dft1= pd.DataFrame(di1.values(), index= di1.keys())
+        dft2 = pd.DataFrame(di2.values(), index= di2.keys())
+        di3= {i['id']:i['topicDetails'] for i in response['items'] if i.has_key('topicDetails')}
+        dft3 = pd.DataFrame(di3.values(), index= di3.keys())
+        dft = pd.concat([dft1, dft2, dft3], axis=1)
+        df = df.append(dft)
+    except (Error),  h:
+      print(h)
+      print(query_function)
   
   # print('Video statistics: ' + str(df.shape[0]))
 
@@ -165,16 +168,19 @@ def youtube_search(query, max_results=1000, with_statistics = False):
   # to retrieve more pages need to loop through nextPageTokens
   while search_response.has_key('nextPageToken') and  df.shape[0] <max_results:
     nextPage = search_response['nextPageToken']
-    search_response = youtube.search().list(
-      q=query,
-      part="id,snippet",
-      type='video',
-      pageToken = nextPage,
-      maxResults=50
-    ).execute()
-    dit={i['id']['videoId']:i['snippet'] for i in search_response['items']}
-    dft  = pd.DataFrame(dit.values(), index = dit.keys())
-    df = df.append(dft, ignore_index=False)
+    try:
+      search_response = youtube.search().list(
+        q=query,
+        part="id,snippet",
+        type='video',
+        pageToken = nextPage,
+        maxResults=50
+      ).execute()
+      dit={i['id']['videoId']:i['snippet'] for i in search_response['items']}
+      dft  = pd.DataFrame(dit.values(), index = dit.keys())
+      df = df.append(dft, ignore_index=False)
+    except (apiclient.errors.HttpError), e:
+      print(e)
   
   df['videoId'] = df.index
   print ('retrieved ' + str(df.shape[0]) + ' results for ' + query)
@@ -205,6 +211,7 @@ def title_clean_operations(ops_df):
     ops = ops.ix[ops.title_clean.str.startswith('anonymous operation')]
     # this line gets the first 4 words 
     ops['title_short'] = ops.title_clean.map(lambda x: ' '.join(re.split(' ', x)[:3]))
+    ops['title_short'] = ops['title_short'].str.replace('operation\w+', 'operation ')
     return ops
 
 def get_thumbnails(ops_df):
@@ -219,3 +226,5 @@ def get_thumbnails(ops_df):
     f=open('images/'+str(i)+'.jpg', 'wb')
     f.write(im.content)
     f.close()
+
+

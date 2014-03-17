@@ -17,6 +17,9 @@ from optparse import OptionParser
 from IPython.display import HTML
 from IPython.display import YouTubeVideo
 import matplotlib.pyplot as plt
+from apiclient.discovery import build
+import apiclient
+from ggplot import *
 pd.set_option("display.max_columns", 6)
 pd.set_option("display.max_rows", 15)
 pd.set_option("display.notebook_repr_html", True)
@@ -26,7 +29,7 @@ pd.set_option("display.notebook_repr_html", True)
 # # Mirroring and Anonymous
 # 
 # We are trying to gain an empirical sense of the extent and shape of mirroring practices in the Anonymous movement. We are focusing on Youtube video mirroring (why? Adam). 
-# There are various problems in trying to get a sense of mirroring practice on Youtube. [TBA -- a description of this]
+# There are various problems in trying to get a sense of Anonynmous mirroring practice on Youtube. [TBA -- a description of this] Although Anonymous is hard to track, they do named 'operations' or #ops that we can track a bit.  
 # 
 # ## What we'd like to produce:
 # 
@@ -41,16 +44,18 @@ pd.set_option("display.notebook_repr_html", True)
 
 # <codecell>
 
-# felipe produced a list of operations
-operations = [op.replace('\n', '') for op in open('data/operations_list.txt').readlines()]
+
+operations = list({op.replace('\n', '') for op in open('data/operations_list.txt').readlines()})
+operations.sort()
 operations_mirror = [op + ' mirror' for op in operations]
 
 # <codecell>
 
-operations.sort()
-operations
+print('There are %d operations' % len(operations))
 
 # <codecell>
+
+
 
 df_ops = pd.DataFrame()
 
@@ -58,10 +63,15 @@ df_ops = pd.DataFrame()
 
 ## the basic operations
 
-for op in operations:
-    df  = yt.youtube_search(op,1000, True)
-    df['operation'] = op
-    df_ops = df_ops.append(df)
+for op in operations[177:]:
+  df  = yt.youtube_search(op,500, True)
+  df['query'] = op
+  df_ops = df_ops.append(df)
+  print (operations.index(op))
+
+# <codecell>
+
+df_ops.shape
 
 # <markdowncell>
 
@@ -71,16 +81,36 @@ for op in operations:
 
 ## run the same operations with 'mirror'
 
-
-
-for op in operations_mirror:
+for op in operations_mirror[110:]:
     df  = yt.youtube_search(op,1000, True)
     df['operation'] = op
     df_ops = df_ops.append(df)
+    print (operations_mirror.index(op))
+
+# <codecell>
+
+df_ops.shape
+
+# <codecell>
+
+def title_clean_operations(ops_df):
+    
+    """ clean up the operations in terms of duplicates,
+    only include videos whose title starts with 'anomymous operation
+    returns a dataframe with title_clean column"""
+    
+    ops = ops_df.drop_duplicates(cols = ['publishedAt', 'videoId'])
+    ops['title_clean'] = ops.title.str.lower().str.replace('\\W+|#|-', ' ').str.strip()
+    ops = ops.ix[ops.title_clean.str.startswith('anonymous operation')]
+    # this line gets the first 4 words 
+    ops['title_short'] = ops.title_clean.map(lambda x: ' '.join(re.split(' ', x)[:3]))
+    return ops
 
 # <codecell>
 
 print ('overall video details:' + str(df_ops.shape))
+ops_df = title_clean_operations(df_ops)
+ops_df.shape
 
 # <markdowncell>
 
@@ -90,7 +120,7 @@ print ('overall video details:' + str(df_ops.shape))
 
 # <codecell>
 
-# local save  -- around 25Mb
+# local save  -- around 60Mb
 df_ops.to_pickle('data/operations_results.pyd')
 
 # <codecell>
@@ -146,29 +176,8 @@ ops_no_dups.head()
 
 # <codecell>
 
-def title_clean_operations(ops_df):
-    
-    # clean up the operations in terms of duplicates,
-    # only include videos whose title starts with 'anomymous operation
-    # returns a dataframe with title_clean column
-    ops = ops_df.drop_duplicates(cols = ['publishedAt', 'videoId'])
-    ops['title_clean'] = ops.title.str.lower().str.replace('\\W+|#|-', ' ').str.strip()
-    ops = ops.ix[ops.title_clean.str.startswith('anonymous operation')]
-    # this line gets the first 4 words 
-    ops['title_short'] = ops.title_clean.map(lambda x: ' '.join(re.split(' ', x)[:3]))
-    return ops
-
-# <codecell>
-
 # this shows some of the problems
-ops = ops_no_dups
-
-# strip all the double spaces, and non-word characters 
-print(ops.title.str.lower().str.strip().str.replace('\\W+', ' ').value_counts()[:20])
-print('\n Videos with short titles\n')
-print(ops[(ops.title.apply(len) < 4)]['title'])
-
-ops['title_clean'] = ops.title.str.lower().str.replace('\\W+', ' ').str.strip()
+ops_df.title_clean.value_counts()
 
 # <markdowncell>
 
@@ -178,14 +187,14 @@ ops['title_clean'] = ops.title.str.lower().str.replace('\\W+', ' ').str.strip()
 
 # <codecell>
 
-ops_cl = title_clean_operations(ops)
-ops_cl = yt.format_durations(ops_cl)
+
+ops_cl = yt.format_durations(ops_df)
 ti_du = ops_cl.groupby('title_short')['duration_time'].value_counts()
 print(ti_du.sum())
 
 # <markdowncell>
 
-# Working with these 2600 videos, we can get an idea of the extent and distribution of mirrors. 
+# Working with these 3500 videos, we can get an idea of the extent and distribution of mirrors. 
 # 
 # ## The main mirrors
 # 
@@ -193,8 +202,10 @@ print(ti_du.sum())
 
 # <codecell>
 
+f= plt.figure(figsize=(10,16))
 print(len(ti_du[ti_du>5]))
-ti_du[ti_du>5].plot(kind='barh',figsize=(10,16))
+ti_du[ti_du>5].plot(kind='barh',figure = f)
+f.set_label('Number of mirrors for main operations')
 
 # <markdowncell>
 

@@ -4,6 +4,14 @@
 		"selected_items":
 		[
 			[
+				"to",
+				"to_datetime"
+			],
+			[
+				"time",
+				"timedelta"
+			],
+			[
 				"du",
 				"duration"
 			],
@@ -231,42 +239,47 @@
 			"file": "YT_api_generate.py",
 			"settings":
 			{
-				"buffer_size": 6226,
+				"buffer_size": 7457,
 				"line_ending": "Unix",
 				"name": "from apiclient.discovery import build"
 			}
 		},
 		{
+			"file": "operation_duration.py",
+			"settings":
+			{
+				"buffer_size": 2605,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/home/mackenza/R/metacommunities/adrian/Github_classify_org.py",
+			"settings":
+			{
+				"buffer_size": 4272,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"contents": "# -*- coding: utf-8 -*-\n# <nbformat>3.0</nbformat>\n\n# <codecell>\n\nimport pandas as pd\n\n# <codecell>\n\nops = pd.read_pickle('data/operations_results.pyd')\n\n# <codecell>\n\nops_no_dups = ops.drop_duplicates(cols = ['publishedAt', 'videoId'])\n\n# <codecell>\n\nops_no_dups = ops.drop_duplicates(cols = ['publishedAt', 'videoId'])\n\n# <codecell>\n\nops = ops_no_dups\n\n# <codecell>\n\n# strip all the double spaces, and non-word characters \n\n# <codecell>\n\nprint(ops.title.str.lower().str.strip().str.replace('\\\\W+', ' ').value_counts()[:20])\n\n# <codecell>\n\nprint('\\n Videos with short titles\\n')\n\n# <codecell>\n\nprint(ops[(ops.title.apply(len) < 4)]['title'])\n\n# <codecell>\n\nops['title_clean'] = ops.title.str.lower().str.strip().str.replace('\\\\W+', ' ')\n\n# <codecell>\n\nops_pure = ops.ix[ops.title_clean.str.contains('anonymous operation')]\n\n# <codecell>\n\n%matplotlib\n\n# <codecell>\n\ntitles = ops_pure.title_clean.value_counts()\n\n# <codecell>\n\ntitles\n\n# <codecell>\n\ntitles > 1\n\n# <codecell>\n\ntitles[titles > 1]\n\n# <codecell>\n\nmirrors = titles[titles > 1]\n\n# <codecell>\n\nmirrors\n\n# <codecell>\n\nimport matplotlib.pyplot as plt\n\n# <codecell>\n\nplt.figure(figsize=(10,4))\n\n# <codecell>\n\nplt.bar(mirrors)\n\n# <codecell>\n\nplt.bar?\n\n# <codecell>\n\nleft = mirrors.index\n\n# <codecell>\n\nleft\n\n# <codecell>\n\nrange(0, len(mirrors))\n\n# <codecell>\n\nleft = range(0, len(mirrors))\n\n# <codecell>\n\nheights = mirrors.values()\n\n# <codecell>\n\nheights = mirrors.values\n\n# <codecell>\n\nheights\n\n# <codecell>\n\nplt.bar(left, heights)\n\n# <codecell>\n\nplt.bar(left=left,height= heights)\n\n# <codecell>\n\nplt.xlabel('operation')\n\n# <codecell>\n\nplt.ylabel('mirror count')\n\n# <codecell>\n\nplt.bar?\n\n# <codecell>\n\nplt.bar?\n\n# <codecell>\n\nplt.bar(left=left,height= heights, width=0.1)\n\n# <codecell>\n\nplt.bar(left=left,height= heights, width=0.01)\n\n# <codecell>\n\nplt.bar(left=left,height= heights, width=0.01)\n\n# <codecell>\n\nhistory\n\n# <codecell>\n\nplt.barh(left=left,height= heights, width=0.01)\n\n# <codecell>\n\nplt.barh(left=left,height= heights)\n\n# <codecell>\n\nplt.barh(left,heights)\n\n# <codecell>\n\n%matplotlib?\n\n# <codecell>\n\nprint(ops_pure.title_clean.unique())\n\n# <codecell>\n\nprint(ops_pure.title_clean.unique()[:40])\n\n# <codecell>\n\nops_pure.title_clean.unique()[:40]\n\n# <codecell>\n\nops_pure.title_clean.str.strip().unique()[:40]\n\n# <codecell>\n\nt\n\n# <codecell>\n\nt = 'asdf'\n\n# <codecell>\n\nt.join?\n\n# <codecell>\n\nimport datetime\n\n# <codecell>\n\ndatetime\n\n# <codecell>\n\ndatetime.time.strftime?\n\n# <codecell>\n\nops\n\n# <codecell>\n\nops.title\n\n# <codecell>\n\nops.duration\n\n# <codecell>\n\nops[['title', 'duration']\n]\n\n# <codecell>\n\nops[['title', 'duration']].map(lambda x,y: print(x,y))\n]\n\n# <codecell>\n\nops[['title', 'duration']].map(lambda x,y: print x)\n\n# <codecell>\n\nops[['title', 'duration']].map(lambda x: print x)\n\n# <codecell>\n\nops[['title', 'duration']]\n\n# <codecell>\n\nops[['title', 'duration']].map(lambda x: x,y)\n\n# <codecell>\n\nops.map(lambda x: x.title)\n\n# <codecell>\n\nops.applymap?\n\n# <codecell>\n\nops.apply?\n\n# <codecell>\n\nimport YT_api_generate as yt\n\n# <codecell>\n\nops = yt.format_durations(ops)\n\n# <markdowncell>\n\n# ## THIS THE KEY BIT TO LINK TITLES AND DURATIONS\n\n# <codecell>\n\ndur_ti = ops.groupby(ops.duration_time)['title'].value_counts()\n\n# <codecell>\n\nt=dt.time?\n\n# <codecell>\n\nt=dt.time(10,11,12)\n\n# <codecell>\n\nt.hour\n\n# <codecell>\n\nt.min\n\n# <codecell>\n\nt.minute\n\n# <codecell>\n\nt.second\n\n# <codecell>\n\nt.dst\n\n# <codecell>\n\nt.dst()\n\n# <codecell>\n\nt.strftime('HH::MM::SS')\n\n# <codecell>\n\nt.strftime('10::10::00')\n\n# <codecell>\n\nt.strftime?\n\n# <codecell>\n\nops.duration_time\n\n# <codecell>\n\nops.duration_time.apply(hour)\n\n# <codecell>\n\nops.duration_time.apply(dt.hour)\n\n# <codecell>\n\nops.duration_time.apply(dt.time.hour)\n\n# <codecell>\n\nops.duration_time[0]\n\n# <codecell>\n\nops.duration_time[:2]\n\n# <codecell>\n\nops.duration_time[:1]\n\n# <codecell>\n\nt=ops.duration_time[:1]\n\n# <codecell>\n\nt\n\n# <codecell>\n\nimport numpy as np\n\n# <codecell>\n\nt\n\n# <codecell>\n\npd.datetools.Hour(t)\n\n# <codecell>\n\nt\n\n# <codecell>\n\ntimes=ops.duration_time\n\n# <codecell>\n\ntimes.median()\n\n# <codecell>\n\ntimes.max()\n\n# <codecell>\n\ntimes.mean()\n\n# <codecell>\n\ntimes.min()\n\n# <codecell>\n\ntimes[0].hour\n\n# <codecell>\n\ntimes[0]\n\n# <codecell>\n\ntimes.ix[0]\n\n# <codecell>\n\nops.groupby(ops.duration_time)['title'].value_counts()\n\n# <codecell>\n\nops.groupby(ops.duration_time)['title'].value_counts()[0]\n\n# <codecell>\n\ntype(dur_ti)\n\n# <codecell>\n\ndu_ti[0]\n\n# <codecell>\n\ndur_ti[0]\n\n# <codecell>\n\ndur_ti[:2]\n\n# <codecell>\n\ndur_ti[:4]\n\n# <codecell>\n\ndur_ti[:6]\n\n# <codecell>\n\ndur_ti.value_counts()\n\n",
+			"file": "/tmp/duration_title_experiments.py",
+			"file_size": -1,
+			"file_write_time": -1,
+			"settings":
+			{
+				"buffer_size": 4512,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"contents": "anonymous operation habbo\nanonymous operation hal turner\nanonymous operation chris forcand\nanonymous operation chanology\nanonymous operation palin\nanonymous operation iran\nanonymous operation didgeridie\nanonymous operation titstorm\nanonymous operation tea party\nanonymous operation payback\nanonymous operation wikileaks\nanonymous operation assange\nanonymous operation leakspin\nanonymous operation visa\nanonymous operation mastercard\nanonymous operation paypal\nanonymous operation tunisia\nanonymous operation egypt\nanonymous operation libya\nanonymous operation hbgary\nanonymous operation empire state\nanonymous operation sony\nanonymous operation india\nanonymous operation malaysia\nanonymous operation orlando\nanonymous operation antisec\nanonymous operation facebook\nanonymous operation bart\nanonymous operation shooting sheriffs\nanonymous operation wall street\nanonymous operation syria\nanonymous operation darknet\nanonymous operation los zetas\nanonymous operation brotherhood takedown\nanonymous operation megaupload\nanonymous operation black march\nanonymous operation acta\nanonymous operation pipa\nanonymous operation sopa\nanonymous operation blackout\nanonymous operation kony\nanonymous operation greece\nanonymous operation quebec\nanonymous operation japan\nanonymous operation blitzkrieg\nanonymous operation anaheim\nanonymous operation steubenville\nanonymous operation aaron swartz\nanonymous operation federal reserve\nanonymous operation north korea\nanonymous operation israel\nanonymous operation last resort\nanonymous operation vendetta\nanonymous operation cispa\nanonymous operation NSA\nanonymous operation american freedom\nanonymous operation big brother\nanonymous operation V\nanonymous operation westboro baptist church\nanonymous operation support snowden\nanonymous operation kiwi freedom\nanonymous operation world bank\nanonymous operation awake the masses\nanonymous operation cannabis\nanonymous operation rohingya\nanonymous operation rose awareness\nanonymous operation rebuild the hive\nanonymous operation bahrain\nanonymous operation ukraine\nanonymous operation pirate bay\nanonymous operation petrol\nanonymous operation ele\nanonymous operation guantanamo bay\nanonymous operation safe winter\nanonymous operation maryville\nanonymous operation green rights\nanonymous operation fullerton\nanonymous operation american spring\nanonymous operation hunthunter\nanonymous operation mayhem\nanonymous project mayhem\nanonymous operation reconnect\nanonymous operation powerbot\nanonymous operation kingfish\nanonymous operation game\nanonymous operation occupythemedia\nanonymous operation indignant",
 			"file": "data/query list",
+			"file_size": -1,
+			"file_write_time": -1,
 			"settings":
 			{
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> 13926bbc10053ee9b712b1aa2891d25ba80c6eb9
-				"buffer_size": 2413,
+				"buffer_size": 2584,
 				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "/home/mackenza/Documents/document-archive/Learning_from_Prada",
-			"settings":
-			{
-				"buffer_size": 43305,
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "felipe/query list",
-			"settings":
-			{
-				"buffer_size": 2383,
-				"line_ending": "Unix"
-=======
-				"buffer_size": 39,
-				"line_ending": "Unix",
-				"name": "AIzaSyAEaWvXp69WuDlHMah2lQZ6Wui2ix6ZDo4"
->>>>>>> 87088b1c83528bce809cf546f443b9c997c8ec87
 			}
 		},
 		{
@@ -382,9 +395,16 @@
 	},
 	"file_history":
 	[
+		"/home/mackenza/R/metacommunities/.git/MERGE_MSG",
+		"/home/mackenza/Documents/data_intensive/book/.git/MERGE_MSG",
+		"/home/mackenza/Documents/mirroring/data/found_operations.csv",
+		"/home/mackenza/Documents/mirroring/data/operations_extra",
+		"/home/mackenza/Documents/mirroring/data/query list",
+		"/home/mackenza/Documents/mirroring/Anonymous_youtube.py",
+		"/home/mackenza/Documents/mirroring/felipe/query list",
+		"/home/mackenza/Documents/document-archive/Learning_from_Prada",
 		"/media/0031-014A/Documents/mirroring/abstract_for_event",
 		"/home/mackenza/Documents/signature.txt",
-		"/home/mackenza/Documents/mirroring/Anonymous_youtube.py",
 		"/tmp/savedrecs-1.txt",
 		"/home/mackenza/Documents/imaginaries_cesagen_2010/data/savedrecs(1).txt",
 		"/home/mackenza/Documents/imaginaries_cesagen_2010/data/savedrecs(8).txt",
@@ -502,14 +522,7 @@
 		"/home/mackenza/Dropbox/data-economy/ngs_paper/ngs_data_methods.txt",
 		"/home/mackenza/Dropbox/data-economy/ngs_paper/paper/ngs_data_methods.txt",
 		"/home/mackenza/.config/sublime-text-2/Packages/SmartMarkdown/Default.sublime-keymap",
-		"/home/mackenza/Dropbox/ngs_paper/paper/ngs_data_methods.rmd",
-		"/home/mackenza/Dropbox/ngs_paper/paper/references/ngs.bib",
-		"/home/mackenza/Dropbox/ngs_paper/paper/ngs_data_paper.sublime-workspace",
-		"/home/mackenza/Dropbox/data-economy/paper/ngs_data_methods.md",
-		"/home/mackenza/Dropbox/data-economy/paper/references/ngs.bib",
-		"/home/mackenza/Dropbox/data-economy/paper/pandoc_format_paper.sh",
-		"/home/mackenza/Dropbox/ngs_paper/build/pandoc.sublime-build",
-		"/home/mackenza/.config/sublime-text-2/Packages/User/untitled.sublime-snippet"
+		"/home/mackenza/Dropbox/ngs_paper/paper/ngs_data_methods.rmd"
 	],
 	"find":
 	{
@@ -527,6 +540,7 @@
 		"case_sensitive": true,
 		"find_history":
 		[
+			"dark",
 			"durat",
 			"json",
 			"json()",
@@ -661,25 +675,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 6226,
+						"buffer_size": 7457,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-<<<<<<< HEAD
-								1910,
-								1910
-=======
-<<<<<<< HEAD
-								1910,
-								1910
-=======
-								45,
-								45
->>>>>>> 87088b1c83528bce809cf546f443b9c997c8ec87
->>>>>>> 13926bbc10053ee9b712b1aa2891d25ba80c6eb9
+								4600,
+								4600
 							]
 						],
 						"settings":
@@ -692,63 +696,35 @@
 							"word_wrap": true
 						},
 						"translation.x": 0.0,
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> 13926bbc10053ee9b712b1aa2891d25ba80c6eb9
-						"translation.y": 1017.0,
+						"translation.y": 3015.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 2,
-<<<<<<< HEAD
-=======
-=======
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 0,
->>>>>>> 87088b1c83528bce809cf546f443b9c997c8ec87
->>>>>>> 13926bbc10053ee9b712b1aa2891d25ba80c6eb9
 					"type": "text"
 				},
 				{
 					"buffer": 1,
-<<<<<<< HEAD
-					"file": "data/query list",
-=======
-<<<<<<< HEAD
-					"file": "data/query list",
-=======
-					"file": "api.txt",
->>>>>>> 87088b1c83528bce809cf546f443b9c997c8ec87
->>>>>>> 13926bbc10053ee9b712b1aa2891d25ba80c6eb9
+					"file": "operation_duration.py",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 2413,
+						"buffer_size": 2605,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								2413,
-								2413
+								0,
+								0
 							]
 						],
 						"settings":
 						{
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-							"auto_name": "AIzaSyAEaWvXp69WuDlHMah2lQZ6Wui2ix6ZDo4",
->>>>>>> 87088b1c83528bce809cf546f443b9c997c8ec87
->>>>>>> 13926bbc10053ee9b712b1aa2891d25ba80c6eb9
-							"syntax": "Packages/Text/Plain text.tmLanguage"
+							"syntax": "Packages/Python/Python.tmLanguage"
 						},
 						"translation.x": 0.0,
-						"translation.y": 1503.0,
+						"translation.y": 4274.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 1,
@@ -756,27 +732,27 @@
 				},
 				{
 					"buffer": 2,
-					"file": "/home/mackenza/Documents/document-archive/Learning_from_Prada",
+					"file": "/home/mackenza/R/metacommunities/adrian/Github_classify_org.py",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 43305,
+						"buffer_size": 4272,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								0,
-								0
+								3620,
+								3620
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/Text/Plain text.tmLanguage"
+							"syntax": "Packages/Python/Python.tmLanguage"
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 2383.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 0,
@@ -784,11 +760,11 @@
 				},
 				{
 					"buffer": 3,
-					"file": "felipe/query list",
+					"file": "/tmp/duration_title_experiments.py",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 2383,
+						"buffer_size": 4512,
 						"regions":
 						{
 						},
@@ -801,10 +777,10 @@
 						],
 						"settings":
 						{
-							"syntax": "Packages/Text/Plain text.tmLanguage"
+							"syntax": "Packages/Python/Python.tmLanguage"
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 3.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 3,
@@ -812,6 +788,34 @@
 				},
 				{
 					"buffer": 4,
+					"file": "data/query list",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2584,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2584,
+								2584
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Text/Plain text.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 1665.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
 					"semi_transient": false,
 					"settings":
 					{
@@ -836,15 +840,7 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-<<<<<<< HEAD
-					"stack_index": 4,
-=======
-<<<<<<< HEAD
-					"stack_index": 4,
-=======
-					"stack_index": 2,
->>>>>>> 87088b1c83528bce809cf546f443b9c997c8ec87
->>>>>>> 13926bbc10053ee9b712b1aa2891d25ba80c6eb9
+					"stack_index": 5,
 					"type": "text"
 				}
 			]
@@ -910,15 +906,7 @@
 		[
 			[
 				"",
-<<<<<<< HEAD
-				"~/Dropbox/mcs_methods/mcs.sublime-project"
-=======
-<<<<<<< HEAD
-				"~/Dropbox/mcs_methods/mcs.sublime-project"
-=======
-				"/media/0031-014A/Documents/data_intensive/book/data_book.sublime-workspace"
->>>>>>> 87088b1c83528bce809cf546f443b9c997c8ec87
->>>>>>> 13926bbc10053ee9b712b1aa2891d25ba80c6eb9
+				"~/Documents/data_intensive/book/data_book.sublime-project"
 			]
 		],
 		"width": 380.0
